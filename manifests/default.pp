@@ -1,16 +1,15 @@
 include '::mysql::server'
 
-exec { "apt-get update":
-  path => "/usr/bin",
+file { '/var/www/app':
+  ensure => directory,
+  recurse => true
 }
 
-package { "apache2":
-  ensure => present,
-  require => Exec["apt-get update"],
+class { 'apache' : }
+apache::vhost { 'dashi' :
+   port => '80', 
+   docroot => '/var/www/app/web',
 }
 
-service { "apache2":
-  ensure => "running",
-  require => Package["apache2"],
-}
-
+class { 'php' : }
+package {'php5-mysql': ensure => present }
