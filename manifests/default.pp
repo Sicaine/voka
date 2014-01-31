@@ -11,7 +11,13 @@ exec { "apt-get update":
   path => "/usr/bin",
 }
 
-class { 'apache' : }
+class { 'apache' :
+  mpm_module => prefork
+}
+
+class { 'apache::mod::php':
+}
+
 apache::vhost { 'dashi' :
    port => '80', 
    docroot => '/var/www/app/web',
@@ -21,7 +27,7 @@ apache::vhost { 'dashi' :
 
 class { 'php' :
     service => 'apache2',
-    require => Service['apache']
+    require => Class['apache::mod::php']
 }
 
 package {'php5-mysql': ensure => present }
