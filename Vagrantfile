@@ -46,7 +46,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # argument is a set of non-required options.
 
   if (/darwin/ =~ RUBY_PLATFORM) != nil
-      config.vm.synced_folder ".", "/var/www/app", nfs: true, :bsd__nfs_options => ["-maproot=0:0"]
+      config.vm.synced_folder ".", "/var/www/app", owner: "www-data", group: "www-data", type: "nfs"
   elsif (!Kernel.is_windows?)
       config.vm.synced_folder ".", "/var/www/app", owner: "www-data", group: "www-data", mount_options: ["dmode=775,fmode=664"]
   else
@@ -57,13 +57,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # backing providers for Vagrant. These expose provider-specific options.
   # Example for VirtualBox:
   #
-  # config.vm.provider :virtualbox do |vb|
-  #   # Don't boot with headless mode
-  #   vb.gui = true
+  #
+  config.vm.provider :virtualbox do |vb|
   #
   #   # Use VBoxManage to customize the VM. For example to change memory:
-  #   vb.customize ["modifyvm", :id, "--memory", "1024"]
-  # end
+    vb.customize ["modifyvm", :id, "--memory", "1024"]
+  end
   #
   # View the documentation for the provider you're using for more
   # information on available options.

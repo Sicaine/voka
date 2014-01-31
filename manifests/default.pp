@@ -15,8 +15,7 @@ class { 'apache' :
   mpm_module => prefork
 }
 
-class { 'apache::mod::php':
-}
+class { ['apache::mod::php', 'apache::mod::rewrite']: }
 
 apache::vhost { 'dashi' :
    port => '80', 
@@ -28,6 +27,12 @@ apache::vhost { 'dashi' :
 class { 'php' :
     service => 'apache2',
     require => Class['apache::mod::php']
+}
+
+php::augeas { 'php-date_timezone':
+  entry  => 'Date/date.timezone',
+  value  => 'Europe/Minsk',
+  require => Class['php']
 }
 
 package {'php5-mysql': ensure => present }
