@@ -1,0 +1,13 @@
+<html>
+	<head>
+	</head>
+	<body>
+		<h1>Dashboards</h1>
+		<ul>
+			<li>New Dashboard...</li>
+		{% for dashboard in dashboards %}
+			<li>{{dashboard.name}}</li>
+		{% endfor %}
+		</ul>
+	</body>
+</html>
