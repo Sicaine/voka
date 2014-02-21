@@ -1,5 +1,3 @@
-include '::mysql::server'
-
 Exec["apt-get update"] -> Package <| |>
 
 file { '/var/www/app':
@@ -36,3 +34,12 @@ php::augeas { 'php-date_timezone':
 }
 
 package {'php5-mysql': ensure => present }
+
+class { '::mysql::server':
+  root_password    => 'root',
+  databases => { 'dashi' => {
+  					ensure => 'present',
+  					charset => 'utf8',
+  							}
+   				},
+}
