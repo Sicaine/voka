@@ -1,0 +1,7 @@
+parameters:
+#    dashi_dashboard.example.class: Dashi\DashboardBundle\Example
+
+services:
+#    dashi_dashboard.example:
+#        class: %dashi_dashboard.example.class%
+#        arguments: [@service_id, "plain_value", %parameter%]

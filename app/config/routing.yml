@@ -1,0 +1,4 @@
+dashi_dashboard:
+    resource: "@DashiDashboardBundle/Resources/config/routing.yml"
+    prefix:   /
+
