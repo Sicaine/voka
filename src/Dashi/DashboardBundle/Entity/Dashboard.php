@@ -39,6 +39,6 @@ class Dashboard {
 	}
 	
 	public function setName($name){
-		return $this->name;
+		return $this->name = $name;
 	}
 }
