@@ -4,4 +4,8 @@ dashi_dashboard_homepage:
 
 dashi_dashboard_overview:
     pattern: /dashboard/manage
-    defaults: {_controller: DashiDashboardBundle:Default:manage }
+    defaults: { _controller: DashiDashboardBundle:Default:manage }
+
+dashi_dashboard_new:
+    pattern: /dashboard/new
+    defaults: { _controller: DashiDashboardBundle:Default:new }
