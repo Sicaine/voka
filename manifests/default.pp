@@ -33,7 +33,14 @@ php::augeas { 'php-date_timezone':
   require => Class['php']
 }
 
+php::augeas { 'php-short_open_tag':
+  entry => 'PHP/short_open_tag',
+  value => 'Off',
+  require => Class['php']
+}
+
 package {'php5-mysql': ensure => present }
+package {'php-apc': ensure => present }
 
 class { '::mysql::server':
   root_password    => 'root',
