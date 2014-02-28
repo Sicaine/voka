@@ -1,14 +1,13 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="dashboardApp">
     <head>
-    {% block head %}
         <link rel="icon" sizes="16x16" href="{{ asset('img/favicon.ico') }}" />
-        <link href="{{ asset('/js/angular.js') }}" rel="javascript" />
-        <link href="{{ asset('/js/jquery-2.1.0.js') }}" rel="javascript" />
+        <script language="javascript" src="{{ asset('/js/jquery-2.1.0.js') }}"></script>
+        <script language="javascript" src="{{ asset('/js/angular.js') }}"></script>
+        {% block head %}{% endblock %}
         <meta http-equiv="Content-Type" content="text/html; charset={{ _charset }}"/>
         <meta name="robots" content="noindex,nofollow" />
         <title>{% block title %}Dashi{% endblock %}</title>
-    {% endblock %}
     </head>
 
     <body {% block body_sub %}{% endblock body_sub %}}>
