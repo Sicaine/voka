@@ -45,8 +45,8 @@ package {'php-apc': ensure => present }
 class { '::mysql::server':
   root_password    => 'root',
   databases => { 'dashi' => {
-  					ensure => 'present',
-  					charset => 'utf8',
-  							}
-   				},
+      ensure => 'present',
+      charset => 'utf8',
+    }
+  },
 }
