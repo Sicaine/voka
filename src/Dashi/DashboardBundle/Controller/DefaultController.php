@@ -43,4 +43,14 @@ class DefaultController extends Controller {
             )
         );
     }
+
+    public function showAction($id){
+        $em = $this->getDoctrine()->getManager();
+        /**
+         * var Dashboard $dashboard
+         */
+        $dashboard = $em->getRepository('Dashi\DashboardBundle\Entity\Dashboard')->find($id);
+
+        return $this->render('DashiDashboardBundle:Default:dashboard.html.twig', array('name' => $dashboard->getName()));
+    }
 }

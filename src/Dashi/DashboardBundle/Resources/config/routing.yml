@@ -9,3 +9,7 @@ dashi_dashboard_overview:
 dashi_dashboard_new:
     pattern: /dashboard/new
     defaults: { _controller: DashiDashboardBundle:Default:new }
+
+dashi_dashboard_show:
+    pattern: /dashboard/show/{id}
+    defaults: { _controller: DashiDashboardBundle:Default:show }

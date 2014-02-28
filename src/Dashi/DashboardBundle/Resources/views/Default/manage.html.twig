@@ -6,7 +6,7 @@
 		<ul>
 			<li><a href="{{ url('dashi_dashboard_new') }}">New Dashboard...</a></li>
 		{% for dashboard in dashboards %}
-			<li>{{dashboard.name}}</li>
+			<li><a href="{{ url('dashi_dashboard_show', {'id' : dashboard.id}) }}">{{dashboard.name}}</a></li>
 		{% endfor %}
 		</ul>
 	</body>
