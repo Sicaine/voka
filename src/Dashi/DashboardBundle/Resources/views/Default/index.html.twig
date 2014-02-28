@@ -1,9 +1,12 @@
-<html>
-	<head>
-	</head>
-	<body>
-		<h1>Welcome to dashi</h1>
-		<div><a href="dashboard/manage">Configure</a></div>
-		<div>Screen</div>
-	</body>
-</html>
+{% extends "DashiDashboardBundle::layout.html.twig" %}
+
+{% block body_sub %}style="width:800px; margin: 0px auto; text-align: center"{% endblock %}
+{% block content %}
+    <h1>Welcome to dashi</h1>
+    <div style="font-size:20px; width:200px; height: 200px;text-align: center;margin: 0px auto">
+        <span style="line-height:200px;vertical-align: middle;"><a href="dashboard/manage">Configure</a></span>
+    </div><br/>
+    <div style="font-size:20px; width:200px; height: 200px;text-align: center;margin: 0px auto">
+        <span style="line-height:200px;vertical-align: middle;"><a href="screen">Screen</a></span>
+    </div>
+{% endblock %}

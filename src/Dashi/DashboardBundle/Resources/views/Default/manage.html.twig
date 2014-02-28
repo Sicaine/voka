@@ -1,7 +1,6 @@
-<html>
-	<head>
-	</head>
-	<body>
+{% extends "DashiDashboardBundle::layout.html.twig" %}
+
+{% block content %}
 		<h1>Dashboards</h1>
 		<ul>
 			<li><a href="{{ url('dashi_dashboard_new') }}">New Dashboard...</a></li>
@@ -9,5 +8,4 @@
 			<li><a href="{{ url('dashi_dashboard_show', {'id' : dashboard.id}) }}">{{dashboard.name}}</a></li>
 		{% endfor %}
 		</ul>
-	</body>
-</html>
+{% endblock %}
