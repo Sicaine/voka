@@ -19,7 +19,8 @@ apache::vhost { 'dashi' :
    port => '80', 
    docroot => '/var/www/app/web',
    docroot_owner => 'www-data',
-   docroot_group => 'www-data'
+   docroot_group => 'www-data',
+   override => ['All'],
 }
 
 class { 'php' :
