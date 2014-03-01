@@ -13,3 +13,23 @@ dashi_dashboard_new:
 dashi_dashboard_show:
     pattern: /dashboard/show/{id}
     defaults: { _controller: DashiDashboardBundle:Default:show }
+
+dashi_widget_retrieve:
+    pattern: /widget/dashboard/{dashboardId}
+    defaults: { _controller: DashiDashboardBundle:Widget:retrieveAll }
+
+dashi_widget_add:
+    pattern: /widget/add/{dashboardId}
+    defaults: { _controller: DashiDashboardBundle:Widget:add }
+
+dashi_widget_remove:
+    pattern: /widget/remove/{widgetId}
+    defaults: { _controller: DashiDashboardBundle:Widget:remove }
+
+dashi_widget_move:
+    pattern: /widget/move/{widgetId}
+    defaults: { _controller: DashiDashboardBundle:Widget:move }
+
+dashi_widget_resizeWidget:
+    pattern: /widget/resize/{widgetId}
+    defaults: { _controller: DashiDashboardBundle:Widget:resize }
