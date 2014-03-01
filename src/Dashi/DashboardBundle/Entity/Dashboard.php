@@ -2,11 +2,13 @@
 
 namespace Dashi\DashboardBundle\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\Table;
 use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\GeneratedValue;
 use Doctrine\ORM\Mapping\Column;
+use Doctrine\ORM\Mapping\OneToMany;
 
 /**
  * @Entity
@@ -25,6 +27,12 @@ class Dashboard {
      * @Column(length=100)
      */
 	protected $name;
+
+    /**
+     * @OneToMany(targetEntity="Widget", mappedBy="dashboard",cascade={"persist"})
+     * @var ArrayCollection
+     */
+    private $widgets;
 	
 	public function getId(){
 		return $this->id;
@@ -41,4 +49,23 @@ class Dashboard {
 	public function setName($name){
 		return $this->name = $name;
 	}
+
+    public function addWidget($widget){
+        $this->widgets[] = $widget;
+    }
+    /**
+     * @param \Doctrine\Common\Collections\ArrayCollection $widgets
+     */
+    public function setWidgets($widgets) {
+        $this->widgets = $widgets;
+    }
+
+    /**
+     * @return \Doctrine\Common\Collections\ArrayCollection
+     */
+    public function getWidgets() {
+        return $this->widgets;
+    }
+
+
 }
