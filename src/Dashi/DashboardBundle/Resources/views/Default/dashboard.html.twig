@@ -13,7 +13,7 @@
 {% block content %}
     {% verbatim %}
         <div id="canvas">
-            <div widget widget-id="{{ row.id }}" ng-repeat="row in widgets" style="left:{{ row.xCord }}px; top:{{ row.yCord }}px; width:{{ row.width }}px;height:{{ row.height }}px; "></div>
+            <div widget widget-id="{{ row.id }}" offset-X="{{ row.xCord }}" offset-Y="{{ row.yCord }}" ng-repeat="row in widgets" class="widget" style="left:{{ row.xCord }}px; top:{{ row.yCord }}px; width:{{ row.width }}px;height:{{ row.height }}px; "></div>
         </div>
     {% endverbatim %}
 {% endblock content %}

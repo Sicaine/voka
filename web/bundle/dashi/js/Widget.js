@@ -10,10 +10,28 @@ angular.module('Library', []).
 
             link: function(scope, element, $attrs) {
                 if(angular.isString($attrs.widgetId)){
+                    scope.startX = scope.offsetX = $attrs.offsetX;
+                    scope.startY = scope.offsetY = $attrs.offsetY;
+
                     scope.widgetId = $attrs.widgetId;
                     element.addClass('saved');
                 } else {
+                    scope.startX = scope.offsetX = event.offsetX;
+                    scope.startY = scope.offsetY = event.offsetY;
 
+                    // if user doesn't click on canvas, recalculate offset
+                    var canvasElement = angular.element('#canvas');
+
+                    if(canvasElement[0] != element[0] && false){
+                        scope.offsetX = scope.offsetX - (element[0].getBoundingClientRect().top - canvasElement[0].getBoundingClientRect().top);
+                        scope.offsetY = scope.offsetY - (element[0].getBoundingClientRect().left - canvasElement[0].getBoundingClientRect().left);
+                    }
+
+                    element.addClass('widget');
+                    element.css('top', scope.offsetY);
+                    element.css('left', scope.offsetX);
+                    element.css('width', 300);
+                    element.css('height', 100);
                 }
 
 
@@ -29,22 +47,7 @@ angular.module('Library', []).
                     event.stopPropagation();
                 });
 
-                scope.offsetX = event.offsetX;
-                scope.offsetY = event.offsetY;
 
-               // if user doesn't click on canvas, recalculate offset
-                var canvasElement = angular.element('#canvas');
-
-                if(canvasElement[0] != element[0] && false){
-                    scope.offsetX = scope.offsetX - (element[0].getBoundingClientRect().top - canvasElement[0].getBoundingClientRect().top);
-                    scope.offsetY = scope.offsetY - (element[0].getBoundingClientRect().left - canvasElement[0].getBoundingClientRect().left);
-                }
-
-                element.addClass('widget');
-                element.css('top', scope.offsetY);
-                element.css('left', scope.offsetX);
-                element.css('width', 300);
-                element.css('height', 100);
 
 
                 console.log('widget link');
