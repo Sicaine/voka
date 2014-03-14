@@ -12,14 +12,24 @@
     font-family: verdana;
     font-size: 20px;
     background: #444444;
-    text-align: center;
     box-shadow: 3px 3px 3px red;
 }
 
+.widget .dragbar {
+    border-bottom: 2px solid black;
+    width:100%;
+}
+
 .widget .name {
+    width:100%;
+    text-align:center;
     line-height: 100px;
 }
 
-.widget .saved {
+.saved {
     box-shadow: 3px 3px 3px green;
+}
+
+.widget .closeX{
+    float:right;
 }
