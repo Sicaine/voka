@@ -13,8 +13,7 @@
 {% block content %}
     {% verbatim %}
         <div id="canvas">
-            <h1>Dashboard {{ name }}</h1>
-            <p ng-repeat="row in widgets">{{ row }}</p>
+            <div widget widget-id="{{ row.id }}" ng-repeat="row in widgets" style="left:{{ row.xCord }}px; top:{{ row.yCord }}px; width:{{ row.width }}px;height:{{ row.height }}px; "></div>
         </div>
     {% endverbatim %}
 {% endblock content %}

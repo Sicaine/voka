@@ -4,8 +4,21 @@ angular.module('Dashboard', []).controller('DashboardCtrl', [
     '$scope',
     '$document',
     '$compile',
-    function($scope, $document, $compile){
-        $scope.widgets = ['Widget 1', 'Widget 2', 'Widget 3', 'Widget 4'];
+    '$routeParams',
+    '$resource',
+    function($scope, $document, $compile, $routeParams, $resource){
+
+        $routeParams.id;
+        var allWidgets = $resource('/app_dev.php/widget/dashboard/:id', {id:1}, {get: { isArray: true }});
+        allWidgets.get({id:1}, function(value) {
+            $scope.widgets = value;
+        },
+        function(error) {
+            console.log('error in allWidgets');
+        })
+        console.log(allWidgets);
+
+
         $document.bind('click', function(event) {
 
            var clickedElement = angular.element(event.target);
