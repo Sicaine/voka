@@ -8,7 +8,11 @@ angular.module('Library', []).
 
             restrict: 'A',
 
-            link: function(scope, element, $linkAttributes) {
+            link: function(scope, element, $attrs) {
+                if(angular.isString($attrs.widgetId)){
+                    scope.widgetId = $attrs.widgetId;
+                    element.addClass('saved');
+                } else {
 
                 }
 
