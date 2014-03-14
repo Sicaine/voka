@@ -1,7 +1,9 @@
 {% extends "DashiDashboardBundle::layout.html.twig" %}
 
 {% block head %}
+    <script language="javascript" src="{{ asset('/bundle/dashi/js/app.js') }}"></script>
     <script language="javascript" src="{{ asset('/bundle/dashi/js/DashboardCtrl.js') }}"></script>
+    <script language="javascript" src="{{ asset('/bundle/dashi/js/Widget.js') }}"></script>
 {% endblock %}
 
 {% block body_sub %}
@@ -10,7 +12,9 @@
 
 {% block content %}
     {% verbatim %}
-		<h1>Dashboard {{ name }}</h1>
-        <p ng-repeat="row in widgets">{{ row }}</p>
+        <div id="canvas" style="width:1920px; height:1080px; border:1px dotted green;">
+            <h1>Dashboard {{ name }}</h1>
+            <p ng-repeat="row in widgets">{{ row }}</p>
+        </div>
     {% endverbatim %}
 {% endblock content %}
