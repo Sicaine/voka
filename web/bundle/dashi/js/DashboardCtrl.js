@@ -22,7 +22,12 @@ angular.module('Dashboard', []).controller('DashboardCtrl', [
         $document.bind('click', function(event) {
 
            var clickedElement = angular.element(event.target);
-            var canvas = angular.element('#canvas');
+           var canvas = angular.element('#canvas');
+            if(canvas[0] != clickedElement[0]) {
+                return;
+            }
+
+
             var newWidgetElement = $compile('<div widget></div>')($scope)
             canvas.append(newWidgetElement);
 

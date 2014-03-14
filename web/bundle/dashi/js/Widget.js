@@ -42,7 +42,6 @@ angular.module('Library', []).
                 element.css('width', 300);
                 element.css('height', 100);
 
-                scope.$apply();
 
                 console.log('widget link');
 
