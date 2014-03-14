@@ -13,3 +13,6 @@ CREATE TABLE widget (
   height int unsigned,
   PRIMARY KEY (id)
 )
+
+
+ALTER TABLE widget ADD FOREIGN KEY (dashboard_id) REFERENCES dashboard(id);
