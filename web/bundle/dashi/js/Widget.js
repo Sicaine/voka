@@ -15,8 +15,7 @@ angular.module('Library', []).
                     event.stopPropagation();
                 });
 
-                var innerObj = angular.element('<span class="name">I\'m a widget</span>');
-                element.append(innerObj);
+
 
                 element.addClass('widget');
                 element.css('top', event.offsetY);
@@ -28,6 +27,8 @@ angular.module('Library', []).
 
                 console.log('widget link');
 
-            }
+            },
+
+            templateUrl: '/bundle/dashi/template/widget.html'
         }
     });
