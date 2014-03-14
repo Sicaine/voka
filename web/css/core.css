@@ -1,0 +1,25 @@
+#canvas {
+    width:1920px;
+    height:1080px;
+    border:1px dotted green;
+    position:relative;
+}
+
+.widget {
+    position: absolute;
+    border: 1px solid red;
+    color: white;
+    font-family: verdana;
+    font-size: 20px;
+    background: #444444;
+    text-align: center;
+    box-shadow: 3px 3px 3px red;
+}
+
+.widget .name {
+    line-height: 100px;
+}
+
+.widget .saved {
+    box-shadow: 3px 3px 3px green;
+}
