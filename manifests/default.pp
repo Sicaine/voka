@@ -20,6 +20,7 @@ apache::vhost { 'dashi' :
    docroot => '/var/www/app/web',
    docroot_owner => 'www-data',
    docroot_group => 'www-data',
+   directoryindex => 'app_dev.php',
    override => ['All'],
 }
 
