@@ -12,12 +12,11 @@ angular.module('Dashboard', []).controller('DashboardCtrl', [
         var allWidgets = $resource('/app_dev.php/widget/dashboard/:id', {id:1}, {get: { isArray: true }});
         allWidgets.get({id:1}, function(value) {
             $scope.widgets = value;
+            console.log('loaded allWidgets');
         },
         function(error) {
             console.log('error in allWidgets');
         })
-        console.log(allWidgets);
-
 
         $document.bind('click', function(event) {
 
@@ -28,7 +27,7 @@ angular.module('Dashboard', []).controller('DashboardCtrl', [
             }
 
 
-            var newWidgetElement = $compile('<div widget></div>')($scope)
+            var newWidgetElement = $compile('<div widget offset-x="'+event.pageX+'" offset-y="'+event.pageY+'"></div>')($scope)
             canvas.append(newWidgetElement);
 
             $scope.$apply();

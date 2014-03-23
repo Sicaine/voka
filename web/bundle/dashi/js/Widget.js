@@ -7,34 +7,24 @@ angular.module('Library', []).
         return {
 
             restrict: 'A',
-
+            scope: {},
             link: function(scope, element, $attrs) {
-                if(angular.isString($attrs.widgetId)){
-                    scope.startX = scope.offsetX = $attrs.offsetX;
-                    scope.startY = scope.offsetY = $attrs.offsetY;
 
+            	scope.startX = scope.offsetX = parseInt($attrs.offsetX);
+                scope.startY = scope.offsetY = parseInt($attrs.offsetY);
+
+                if(angular.isString($attrs.widgetId)){
                     scope.widgetId = $attrs.widgetId;
                     element.addClass('saved');
                 } else {
-                    scope.startX = scope.offsetX = event.offsetX;
-                    scope.startY = scope.offsetY = event.offsetY;
-
-                    // if user doesn't click on canvas, recalculate offset
-                    var canvasElement = angular.element('#canvas');
-
-                    if(canvasElement[0] != element[0] && false){
-                        scope.offsetX = scope.offsetX - (element[0].getBoundingClientRect().top - canvasElement[0].getBoundingClientRect().top);
-                        scope.offsetY = scope.offsetY - (element[0].getBoundingClientRect().left - canvasElement[0].getBoundingClientRect().left);
-                    }
-
                     element.addClass('widget');
+                   
+                    scope.widgetId = 'rand' + Math.random();
                     element.css('top', scope.offsetY);
                     element.css('left', scope.offsetX);
                     element.css('width', 300);
                     element.css('height', 100);
                 }
-
-
 
                 element.find('.name').bind('click', function(event) {
                     alert('clicked in widget');
@@ -46,11 +36,6 @@ angular.module('Library', []).
                     element.remove();
                     event.stopPropagation();
                 });
-
-
-
-
-                console.log('widget link');
 
                 element.find('.dragbar').on('mousedown', function(event) {
                     var xElement = element.find('.closeX');
@@ -85,7 +70,6 @@ angular.module('Library', []).
 
                     event.stopPropagation();
                 }
-
             },
 
             templateUrl: '/bundle/dashi/template/widget.html'
