@@ -33,6 +33,10 @@ angular.module('Library', []).
                     move: {method:'GET', params:{xCord: '', yCord: '', width: '', height: ''}}
                 });
 
+                var resizeWidgetRes = $resource('/app_dev.php/widget/resize/:id', {id:1}, {
+                    resize: {method:'GET', params:{width: '', height: ''}}
+                });
+
             	scope.startX = scope.offsetX = parseInt($attrs.offsetX);
                 scope.startY = scope.offsetY = parseInt($attrs.offsetY);
                 scope.width = parseInt($attrs.width);
@@ -107,6 +111,10 @@ angular.module('Library', []).
                     scope.width += scope.diffX;
                     scope.height += scope.diffY;
                     event.stopPropagation();
+
+                    resizeWidgetRes.resize({ id: scope.widgetId, width: scope.width, height: scope.height}, function() {
+                        element.addClass('saved');
+                    })
                 }
 
 
