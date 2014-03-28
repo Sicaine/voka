@@ -18,6 +18,7 @@
 .widget .dragbar {
     border-bottom: 2px solid black;
     width:100%;
+    cursor:move;
 }
 
 .widget .name {
@@ -32,6 +33,7 @@
 
 .widget .closeX{
     float:right;
+    cursor:initial;
 }
 
 .widget .resizeIcon {
