@@ -30,7 +30,7 @@ angular.module('Library', []).
                 });
 
                 var moveWidgetRes = $resource('/app_dev.php/widget/move/:id', {id:1}, {
-                    move: {method:'GET', params:{xCord: '', yCord: '', width: '', height: ''}}
+                    move: {method:'GET', params:{xCord: '', yCord: ''}}
                 });
 
                 var resizeWidgetRes = $resource('/app_dev.php/widget/resize/:id', {id:1}, {
@@ -98,8 +98,6 @@ angular.module('Library', []).
                     scope.diffX = event.pageX - scope.resizeX;
                     element.css('width', scope.width + scope.diffX);
                     element.css('height', scope.height + scope.diffY);
-
-                    console.log('resizing ' + scope.diffX + ' | ' + scope.diffY);
 
                     event.stopPropagation();
                 }
