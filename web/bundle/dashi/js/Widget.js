@@ -79,6 +79,39 @@ angular.module('Library', []).
                     event.stopPropagation();
                 });
 
+                element.find('.resizeIcon').bind('mousedown', function(event) {
+
+                    event.preventDefault();
+                    scope.resizeX = event.pageX;
+                    scope.resizeY = event.pageY;
+                    $document.on('mousemove', mousemoveResize);
+                    $document.on('mouseup', mouseupResize);
+                    event.stopPropagation();
+                });
+                function mousemoveResize(event) {
+                    element.removeClass('saved');
+                    scope.diffY = event.pageY - scope.resizeY;
+                    scope.diffX = event.pageX - scope.resizeX;
+                    element.css('width', scope.width + scope.diffX);
+                    element.css('height', scope.height + scope.diffY);
+
+                    console.log('resizing ' + scope.diffX + ' | ' + scope.diffY);
+
+                    event.stopPropagation();
+                }
+
+                function mouseupResize(event) {
+                    $document.unbind('mousemove', mousemoveResize);
+                    $document.unbind('mouseup', mouseupResize);
+
+                    scope.width += scope.diffX;
+                    scope.height += scope.diffY;
+                    event.stopPropagation();
+                }
+
+
+
+
                 element.find('.dragbar').on('mousedown', function(event) {
                     var xElement = element.find('.closeX');
                     if(xElement[0] == event.target[0]){
