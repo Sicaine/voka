@@ -14,13 +14,6 @@ angular.module('Library', []).
             scope: {},
             link: function(scope, element, $attrs) {
 
-
-//                xCord'));
-//                $widget->setYCord($request->get('yCord'));
-//                $widget->setWidth($request->get('width'));
-//                $widget->setHeight($request->get('height'));
-//
-//
                 var addWidgetRes = $resource('/app_dev.php/widget/add/:id', {id:1}, {
                     add: {method:'GET', params:{xCord: '', yCord: '', width: '', height: ''}}
                 });
@@ -83,6 +76,7 @@ angular.module('Library', []).
                     event.stopPropagation();
                 });
 
+                // Resize Widget
                 element.find('.resizeIcon').bind('mousedown', function(event) {
 
                     event.preventDefault();
@@ -92,6 +86,7 @@ angular.module('Library', []).
                     $document.on('mouseup', mouseupResize);
                     event.stopPropagation();
                 });
+
                 function mousemoveResize(event) {
                     element.removeClass('saved');
                     scope.diffY = event.pageY - scope.resizeY;
@@ -116,8 +111,7 @@ angular.module('Library', []).
                 }
 
 
-
-
+                // Move Widget
                 element.find('.dragbar').on('mousedown', function(event) {
                     var xElement = element.find('.closeX');
                     if(xElement[0] == event.target[0]){
