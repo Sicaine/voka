@@ -35,18 +35,22 @@ angular.module('Library', []).
 
             	scope.startX = scope.offsetX = parseInt($attrs.offsetX);
                 scope.startY = scope.offsetY = parseInt($attrs.offsetY);
+                scope.width = parseInt($attrs.width);
+                scope.height = parseInt($attrs.height);
 
                 if(angular.isString($attrs.widgetId)){
                     scope.widgetId = $attrs.widgetId;
                     element.addClass('saved');
                 } else {
+                    scope.width = 300;
+                    scope.height = 100;
                     element.addClass('widget');
                    
                     scope.widgetId = 'rand' + Math.random();
                     element.css('top', scope.offsetY);
                     element.css('left', scope.offsetX);
-                    element.css('width', 300);
-                    element.css('height', 100);
+                    element.css('width', scope.width);
+                    element.css('height', scope.height);
 
                     addWidgetRes.add( { xCord: scope.offsetX, yCord: scope.offsetY, width: 300, height: 100} , function(data){
                         console.log('saved widget, new id: ' + data.id);
