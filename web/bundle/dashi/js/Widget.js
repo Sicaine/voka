@@ -25,6 +25,10 @@ angular.module('Library', []).
                     add: {method:'GET', params:{xCord: '', yCord: '', width: '', height: ''}}
                 });
 
+                var delWidgetRes = $resource('/app_dev.php/widget/remove/:id', {id:1}, {
+                    del: {method:'GET'}
+                });
+
             	scope.startX = scope.offsetX = parseInt($attrs.offsetX);
                 scope.startY = scope.offsetY = parseInt($attrs.offsetY);
 
@@ -54,7 +58,16 @@ angular.module('Library', []).
 
                 element.find('.closeX').bind('click', function(event) {
                     scope.$destroy();
-                    element.remove();
+                    delWidgetRes.del( {id: scope.widgetId }, function() {
+                            element.addClass('saved');
+                            $timeout( function() {
+                                element.remove();
+                            } , 500);
+                        },
+                    function() {
+                        alert('couldn\'t delete widget; error in backend');
+                    })
+
                     event.stopPropagation();
                 });
 
