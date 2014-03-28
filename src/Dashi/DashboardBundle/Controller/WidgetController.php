@@ -51,7 +51,7 @@ class WidgetController  extends Controller {
         $widget->setDashboard($dashboard);
         $em->flush();
 
-        return new JsonResponse();
+        return new JsonResponse(array( 'id' => $widget->getId()));
     }
 
     public function removeAction($widgetId){

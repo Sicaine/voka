@@ -1,7 +1,11 @@
 'use strict';
 
 angular.module('Library', []).
-    directive('widget', function($document) {
+    directive('widget', [
+        '$document',
+        '$resource',
+        '$timeout',
+        function($document, $resource, $timeout) {
 
         console.log('widget global');
         return {
@@ -9,6 +13,17 @@ angular.module('Library', []).
             restrict: 'A',
             scope: {},
             link: function(scope, element, $attrs) {
+
+
+//                xCord'));
+//                $widget->setYCord($request->get('yCord'));
+//                $widget->setWidth($request->get('width'));
+//                $widget->setHeight($request->get('height'));
+//
+//
+                var addWidgetRes = $resource('/app_dev.php/widget/add/:id', {id:1}, {
+                    add: {method:'GET', params:{xCord: '', yCord: '', width: '', height: ''}}
+                });
 
             	scope.startX = scope.offsetX = parseInt($attrs.offsetX);
                 scope.startY = scope.offsetY = parseInt($attrs.offsetY);
@@ -24,6 +39,12 @@ angular.module('Library', []).
                     element.css('left', scope.offsetX);
                     element.css('width', 300);
                     element.css('height', 100);
+
+                    addWidgetRes.add( { xCord: scope.offsetX, yCord: scope.offsetY, width: 300, height: 100} , function(data){
+                        console.log('saved widget, new id: ' + data.id);
+                        scope.widgetId = data.id;
+                        element.addClass('saved');
+                    } );
                 }
 
                 element.find('.name').bind('click', function(event) {
@@ -74,4 +95,4 @@ angular.module('Library', []).
 
             templateUrl: '/bundle/dashi/template/widget.html'
         }
-    });
+    }]);
