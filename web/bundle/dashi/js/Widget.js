@@ -29,6 +29,10 @@ angular.module('Library', []).
                     del: {method:'GET'}
                 });
 
+                var moveWidgetRes = $resource('/app_dev.php/widget/move/:id', {id:1}, {
+                    move: {method:'GET', params:{xCord: '', yCord: '', width: '', height: ''}}
+                });
+
             	scope.startX = scope.offsetX = parseInt($attrs.offsetX);
                 scope.startY = scope.offsetY = parseInt($attrs.offsetY);
 
@@ -101,6 +105,10 @@ angular.module('Library', []).
                 function mouseup(event) {
                     $document.unbind('mousemove', mousemove);
                     $document.unbind('mouseup', mouseup);
+
+                    moveWidgetRes.move({ id: scope.widgetId, xCord: scope.offsetX, yCord: scope.offsetY}, function() {
+                        element.addClass('saved');
+                    })
 
                     event.stopPropagation();
                 }
