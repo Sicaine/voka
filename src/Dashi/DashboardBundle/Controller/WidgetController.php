@@ -93,4 +93,15 @@ class WidgetController  extends Controller {
 
         return new JsonResponse();
     }
-} 
+
+    public function pluginTypeIdAction($widgetId) {
+        $em = $this->getDoctrine()->getManager();
+
+        /**
+         * var Widget $widget
+         */
+        $widget = $em->getRepository('Dashi\DashboardBundle\Entity\Widget')->find($widgetId);
+
+        return new JsonResponse(array( 'pluginTypeId' => $widget->getPluginTypeId()));
+    }
+}

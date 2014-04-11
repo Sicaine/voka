@@ -33,3 +33,7 @@ dashi_widget_move:
 dashi_widget_resizeWidget:
     pattern: /widget/resize/{widgetId}
     defaults: { _controller: DashiDashboardBundle:Widget:resize }
+
+dashi_widget_pluginTypeId:
+    pattern: /widget/pluginTypeId/{widgetId}
+    defaults: { _controller: DashiDashboardBundle:Widget:pluginTypeId }
