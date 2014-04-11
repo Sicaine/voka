@@ -11,6 +11,7 @@ CREATE TABLE widget (
   yCord int unsigned,
   width int unsigned,
   height int unsigned,
+  pluginTypeId varchar(40),
   PRIMARY KEY (id)
 )
 

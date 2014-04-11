@@ -47,6 +47,12 @@ class Widget {
     protected $height;
 
     /**
+     * @Column
+     * @var string
+     */
+    protected $pluginTypeId;
+
+    /**
      * @ManyToOne(targetEntity="Dashboard", inversedBy="widgets")
      */
     protected $dashboard;
@@ -77,6 +83,20 @@ class Widget {
      */
     public function getId() {
         return $this->id;
+    }
+
+    /**
+     * @param string $pluginTypeId
+     */
+    public function setPluginTypeId($pluginTypeId) {
+        $this->pluginTypeId = $pluginTypeId;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPluginTypeId() {
+        return $this->pluginTypeId;
     }
 
     /**
