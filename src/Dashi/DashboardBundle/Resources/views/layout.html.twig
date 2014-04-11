@@ -7,28 +7,28 @@
         <script language="javascript" src="{{ asset('/js/angular.js') }}"></script>
         <script language="javascript" src="{{ asset('/js/angular-resource.js') }}"></script>
         <script language="javascript" src="{{ asset('/js/angular-route.js') }}"></script>
-        {% block head %}{% endblock %}
+{% block head %}{% endblock %}
         <meta http-equiv="Content-Type" content="text/html; charset={{ _charset }}"/>
         <meta name="robots" content="noindex,nofollow" />
         <title>{% block title %}Dashi{% endblock %}</title>
     </head>
 
     <body {% block body_sub %}{% endblock body_sub %}>
-    {% for flashMessage in app.session.flashbag.get('notice') %}
+{% for flashMessage in app.session.flashbag.get('notice') %}
         <div class="flash-message">
             <em>Notice</em>: {{ flashMessage }}
         </div>
-    {% endfor %}
+{% endfor %}
 
     <div class="content">
-        {% block content %}{% endblock %}
+{% block content %}{% endblock %}
     </div>
 
-    {% if code is defined %}
+{% if code is defined %}
         <h2>Code behind this page</h2>
         <div class="block">
             <div class="symfony-content">{{ code|raw }}</div>
         </div>
-    {% endif %}
+{% endif %}
     </body>
 </html>

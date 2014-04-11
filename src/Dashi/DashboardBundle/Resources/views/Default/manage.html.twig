@@ -4,8 +4,8 @@
 		<h1>Dashboards</h1>
 		<ul>
 			<li><a href="{{ url('dashi_dashboard_new') }}">New Dashboard...</a></li>
-		{% for dashboard in dashboards %}
+{% for dashboard in dashboards %}
 			<li><a href="{{ url('dashi_dashboard_show', {'id' : dashboard.id}) }}">{{dashboard.name}}</a></li>
-		{% endfor %}
+{% endfor %}
 		</ul>
 {% endblock %}
