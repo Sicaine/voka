@@ -1,4 +1,7 @@
+dashi_widget_simple_clock:
+    resource: "@DashiWidgetSimpleClockBundle/Resources/config/routing.yml"
+    prefix:   /
+
 dashi_dashboard:
     resource: "@DashiDashboardBundle/Resources/config/routing.yml"
     prefix:   /
-
