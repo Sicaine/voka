@@ -58,6 +58,20 @@ class Widget {
     protected $dashboard;
 
     /**
+     * @param mixed $dashboard
+     */
+    public function setDashboard($dashboard) {
+        $this->dashboard = $dashboard;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDashboard() {
+        return $this->dashboard;
+    }
+
+    /**
      * @param int $height
      */
     public function setHeight($height) {
@@ -114,14 +128,14 @@ class Widget {
     }
 
     /**
-     * @param mixed $xCord
+     * @param int $xCord
      */
     public function setXCord($xCord) {
         $this->xCord = $xCord;
     }
 
     /**
-     * @return mixed
+     * @return int
      */
     public function getXCord() {
         return $this->xCord;
@@ -140,19 +154,4 @@ class Widget {
     public function getYCord() {
         return $this->yCord;
     }
-
-    /**
-     * @param mixed $dashboard
-     */
-    public function setDashboard($dashboard) {
-        $this->dashboard = $dashboard;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getDashboard() {
-        return $this->dashboard;
-    }
-
 }
