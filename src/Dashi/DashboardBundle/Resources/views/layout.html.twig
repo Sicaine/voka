@@ -13,7 +13,7 @@
         <title>{% block title %}Dashi{% endblock %}</title>
     </head>
 
-    <body {% block body_sub %}{% endblock body_sub %}}>
+    <body {% block body_sub %}{% endblock body_sub %}>
     {% for flashMessage in app.session.flashbag.get('notice') %}
         <div class="flash-message">
             <em>Notice</em>: {{ flashMessage }}
