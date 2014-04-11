@@ -12,8 +12,11 @@
 
 {% block content %}
     {% verbatim %}
+        <h1>{{ id }}</h1>
         <div id="canvas">
-            <div widget widget-id="{{ row.id }}" offset-X="{{ row.xCord }}" offset-Y="{{ row.yCord }}"
+            <div widget widget-id="{{ row.id }}"
+                 dashboard-id="{{ row.dashboardId }}"
+                 offset-X="{{ row.xCord }}" offset-Y="{{ row.yCord }}"
                  width="{{ row.width }}" height="{{ row.height }}"
                  ng-repeat="row in widgets" class="widget" style="left:{{ row.xCord }}px; top:{{ row.yCord }}px; width:{{ row.width }}px;height:{{ row.height }}px; "></div>
         </div>

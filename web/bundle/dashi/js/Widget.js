@@ -14,19 +14,21 @@ angular.module('Library', []).
             scope: {},
             link: function(scope, element, $attrs) {
 
-                var addWidgetRes = $resource('/app_dev.php/widget/add/:id', {id:1}, {
+                scope.dashboardId = parseInt($attrs.dashboardId);
+
+                var addWidgetRes = $resource('/app_dev.php/widget/add/:id', {id:scope.dashboardId}, {
                     add: {method:'GET', params:{xCord: '', yCord: '', width: '', height: ''}}
                 });
 
-                var delWidgetRes = $resource('/app_dev.php/widget/remove/:id', {id:1}, {
+                var delWidgetRes = $resource('/app_dev.php/widget/remove/:id', {id:scope.dashboardId}, {
                     del: {method:'GET'}
                 });
 
-                var moveWidgetRes = $resource('/app_dev.php/widget/move/:id', {id:1}, {
+                var moveWidgetRes = $resource('/app_dev.php/widget/move/:id', {id:scope.dashboardId}, {
                     move: {method:'GET', params:{xCord: '', yCord: ''}}
                 });
 
-                var resizeWidgetRes = $resource('/app_dev.php/widget/resize/:id', {id:1}, {
+                var resizeWidgetRes = $resource('/app_dev.php/widget/resize/:id', {id:scope.dashboardId}, {
                     resize: {method:'GET', params:{width: '', height: ''}}
                 });
 

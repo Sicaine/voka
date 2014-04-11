@@ -4,7 +4,8 @@ angular.module('dashboardApp',
         'ngResource',
         'ngRoute',
         'Library'
-    ])
-    .config(['$routeProvider', function($routeProvider) {
-    $routeProvider.when('/dashboard/show/:id', {templateUrl: 'blub.html', controller: 'DashboardCtrl'});
-}]);
+    ]);
+
+angular.module('Dashboard', [], function($locationProvider) {
+    $locationProvider.html5Mode(true);
+});

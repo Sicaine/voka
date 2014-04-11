@@ -1,17 +1,24 @@
 'use strict';
 
-angular.module('Dashboard', []).controller('DashboardCtrl', [
+angular.module('Dashboard').controller('DashboardCtrl', [
     '$scope',
     '$document',
     '$compile',
-    '$routeParams',
     '$resource',
-    function($scope, $document, $compile, $routeParams, $resource){
+    '$location',
+    function($scope, $document, $compile, $resource, $location){
 
-        $routeParams.id;
+        $scope.id = $routeParams.id;
+        $scope.id = $location.url().substr($location.url().lastIndexOf('/') + 1);
+
         var allWidgets = $resource('/app_dev.php/widget/dashboard/:id', {id:1}, {get: { isArray: true }});
-        allWidgets.get({id:1}, function(value) {
+        allWidgets.get({id: $scope.id}, function(value) {
             $scope.widgets = value;
+
+            angular.forEach($scope.widgets, function(row) {
+                row.dashboardId = $scope.id;
+            })
+
             console.log('loaded allWidgets');
         },
         function(error) {
@@ -27,7 +34,7 @@ angular.module('Dashboard', []).controller('DashboardCtrl', [
             }
 
 
-            var newWidgetElement = $compile('<div widget offset-x="'+event.pageX+'" offset-y="'+event.pageY+'"></div>')($scope)
+            var newWidgetElement = $compile('<div widget dashboard-id="'+$scope.id+'" offset-x="'+event.pageX+'" offset-y="'+event.pageY+'"></div>')($scope)
             canvas.append(newWidgetElement);
 
             $scope.$apply();
