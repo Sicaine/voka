@@ -8,7 +8,6 @@ angular.module('Dashboard').controller('DashboardCtrl', [
     '$location',
     function($scope, $document, $compile, $resource, $location){
 
-        $scope.id = $routeParams.id;
         $scope.id = $location.url().substr($location.url().lastIndexOf('/') + 1);
 
         var allWidgets = $resource('/app_dev.php/widget/dashboard/:id', {id:1}, {get: { isArray: true }});
