@@ -1,5 +1,13 @@
 <div class="dragbar">[ <span class="closeX">[&nbsp;X&nbsp;]]</span></div>
 
-<span class="name">I'm a widget</span>
+<div style="overflow:auto">
+    <span class="name">Choose your Widget Type:</span>
+    <img class="ajaxLoader" src="/img/ajax-loader.gif"/>
+
+    <ul>
+        <li ng-repeat="plugin in pluginList"><button ng-click="changeToPlugin(plugin.id)">{{ plugin.id }}</button></li>
+    </ul>
+
+</div>
 
 <div class="resizeIcon"></div>

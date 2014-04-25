@@ -151,6 +151,33 @@ angular.module('Library', []).
 
                     event.stopPropagation();
                 }
+
+
+
+                // retrieve pluginTypeId of widget
+                var pluginTypeIdRes = $resource('/app_dev.php/widget/pluginTypeId/:id', {id:scope.widgetId}, {
+                    add: {method:'GET'}
+                });
+
+                // retrieve available plugins for widgets
+                var plugins= $resource('/app_dev.php/plugin/plugins', {}, {
+                    get: {method:'GET', isArray: true}
+                });
+
+                scope.pluginList = null;
+
+                pluginTypeIdRes.get(function() {
+                    element.find(".ajaxLoader").remove();
+                });
+
+                plugins.get(function(data) {
+                    scope.pluginList = data;
+                })
+
+                scope.changeToPlugin = function (id){
+                    console.log(id);
+                }
+
             },
 
             templateUrl: '/bundle/dashi/template/widget.html'
