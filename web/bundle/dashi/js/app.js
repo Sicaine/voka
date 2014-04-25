@@ -3,7 +3,8 @@ angular.module('dashboardApp',
         'Dashboard',
         'ngResource',
         'ngRoute',
-        'Library'
+        'Library',
+        'Plugin'
     ]);
 
 angular.module('Dashboard', [], function($locationProvider) {
