@@ -165,16 +165,6 @@ angular.module('Library', []).
                     get: {method:'GET', isArray: true}
                 });
 
-                scope.pluginList = null;
-
-                pluginTypeIdRes.get(function() {
-                    element.find(".ajaxLoader").remove();
-                });
-
-                plugins.get(function(data) {
-                    scope.pluginList = data;
-                })
-
                 scope.changeToPlugin = function (id){
                     var setPluginTypeIdRes = $resource('/app_dev.php/widget/setPluginTypeId/:id',
                         {
@@ -193,6 +183,21 @@ angular.module('Library', []).
                         //scope.$apply();
                     });
                 }
+                
+                scope.pluginList = null;
+
+                pluginTypeIdRes.get(function(data) {
+                    element.find(".ajaxLoader").remove();
+                    if(data.pluginTypeId != null) {
+                        scope.changeToPlugin(data.pluginTypeId);
+                    }
+                });
+
+                plugins.get(function(data) {
+                    scope.pluginList = data;
+                })
+
+
 
             },
 
