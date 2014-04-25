@@ -5,7 +5,8 @@ angular.module('Library', []).
         '$document',
         '$resource',
         '$timeout',
-        function($document, $resource, $timeout) {
+        '$compile',
+        function($document, $resource, $timeout, $compile) {
 
         console.log('widget global');
         return {
@@ -184,7 +185,13 @@ angular.module('Library', []).
                             set: {method:'GET'}
                         });
 
-                    setPluginTypeIdRes.set(function() {});
+
+                    setPluginTypeIdRes.set(function() {
+                        // only change content if successfull
+                        var newPluginElement = $compile('<div ' + id.replace('_', '-') + '></div>')(scope);
+                        element.find('.container').replaceWith(newPluginElement);
+                        //scope.$apply();
+                    });
                 }
 
             },
