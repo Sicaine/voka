@@ -47,3 +47,8 @@
     cursor:se-resize;
     border-bottom-right-radius: 5px;
 }
+
+.widget .container {
+    height: 100%;
+    overflow: auto;
+}
