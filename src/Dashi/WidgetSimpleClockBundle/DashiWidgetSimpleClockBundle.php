@@ -2,8 +2,11 @@
 
 namespace Dashi\WidgetSimpleClockBundle;
 
-use Symfony\Component\HttpKernel\Bundle\Bundle;
+use Dashi\DashboardBundle\DashiDashboardPlugin;
 
-class DashiWidgetSimpleClockBundle extends Bundle
+class DashiWidgetSimpleClockBundle extends DashiDashboardPlugin
 {
+    public function getPluginId(){
+        return 'SIMPLE_CLOCK';
+    }
 }
