@@ -39,3 +39,8 @@ dashi_widget_resizeWidget:
 dashi_widget_pluginTypeId:
     pattern: /widget/pluginTypeId/{widgetId}
     defaults: { _controller: DashiDashboardBundle:Widget:pluginTypeId }
+
+# Plugin routing
+dashi_plugin_retrieve:
+    pattern: /plugin/plugins
+    defaults: { _controller: DashiDashboardBundle:Plugin:retrieveAll }
