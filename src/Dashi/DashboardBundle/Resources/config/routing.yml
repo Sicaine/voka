@@ -40,6 +40,10 @@ dashi_widget_pluginTypeId:
     pattern: /widget/pluginTypeId/{widgetId}
     defaults: { _controller: DashiDashboardBundle:Widget:pluginTypeId }
 
+dashi_widget_setPluginTypeId:
+    pattern: /widget/setPluginTypeId/{widgetId}
+    defaults: { _controller: DashiDashboardBundle:Widget:setPluginTypeId }
+
 # Plugin routing
 dashi_plugin_retrieve:
     pattern: /plugin/plugins

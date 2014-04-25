@@ -175,7 +175,16 @@ angular.module('Library', []).
                 })
 
                 scope.changeToPlugin = function (id){
-                    console.log(id);
+                    var setPluginTypeIdRes = $resource('/app_dev.php/widget/setPluginTypeId/:id',
+                        {
+                            id:scope.widgetId,
+                            pluginTypeId: id
+                        },
+                        {
+                            set: {method:'GET'}
+                        });
+
+                    setPluginTypeIdRes.set(function() {});
                 }
 
             },
