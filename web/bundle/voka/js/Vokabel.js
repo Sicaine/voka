@@ -16,7 +16,7 @@ angular.module('Library', []).
             link: function(scope, element, $attrs) {
 
                 var vokabel = $resource('/vokabel', {}, {get: {}});
-                vokabel.get({}, function(value) {
+                scope.vokabel = vokabel.get({}, function(value) {
                         console.log(value);
                         console.log('success in vokabel');
                     },
