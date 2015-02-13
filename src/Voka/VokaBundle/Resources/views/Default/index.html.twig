@@ -3,6 +3,7 @@
 {% block head %}
     <script language="javascript" src="{{ asset('/bundle/voka/js/app.js') }}"></script>
     <script language="javascript" src="{{ asset('/bundle/voka/js/VokaCtrl.js') }}"></script>
+    <script language="javascript" src="{{ asset('/bundle/voka/js/Vokabel.js') }}"></script>
 {% endblock %}
 
 {% block body_sub %}
@@ -11,6 +12,7 @@
 
 {% block content %}
     {% verbatim %}
-
+        <div vokabel>
+        </div>
     {% endverbatim %}
 {% endblock content %}

@@ -2,7 +2,8 @@ angular.module('vokaApp',
     [
         'Voka',
         'ngResource',
-        'ngRoute'
+        'ngRoute',
+        'Library'
     ]);
 
 angular.module('Voka', [], function() {
