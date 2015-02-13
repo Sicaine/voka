@@ -2,3 +2,7 @@
 voka_homepage:
     pattern:  /
     defaults: { _controller: VokaBundle:Default:index }
+
+voka_get:
+    pattern: /vokabel
+    defaults: { _controller: VokaBundle:Default:getVokabel}
