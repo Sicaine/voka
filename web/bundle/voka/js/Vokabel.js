@@ -15,17 +15,24 @@ angular.module('Library', []).
             scope: {},
             link: function(scope, element, $attrs) {
 
-                var vokabel = $resource('/vokabel', {}, {get: {}});
+                var loadVokabel = function() {
+                    var vokabel = $resource('/vokabel', {}, {get: {}});
 
-                scope.vokabel = vokabel.get({}, function(value) {
-                        console.log(value);
-                        console.log('success in vokabel');
-                    },
-                    function(error) {
-                        console.log('error in vokabel');
-                    });
+                    scope.vokabel = vokabel.get({}, function (value) {
+                            console.log(value);
+                            console.log('success in vokabel');
+                        },
+                        function (error) {
+                            console.log('error in vokabel');
+                        });
+                }
 
-                scope.$on('voka.next', function(event) { console.log('blub n pressed?!'); })
+                // initial
+                loadVokabel();
+
+                scope.$on('voka.next', function(event) {
+                    loadVokabel();
+                })
             },
 
             templateUrl: '/bundle/voka/template/vokabel.html'
