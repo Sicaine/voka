@@ -11,8 +11,9 @@ angular.module('Voka').controller('VokaCtrl', [
 
         $document.bind('keypress', function(event) {
 
-            console.log(event.keyCode);
-
+            if(event.keyCode === 110) {
+                $scope.$broadcast("voka.next");
+            }
         });
 
 }]);
