@@ -1,7 +1,0 @@
-parameters:
-#    dashi_widget_simple_clock.example.class: Dashi\WidgetSimpleClockBundle\Example
-
-services:
-#    dashi_widget_simple_clock.example:
-#        class: %dashi_widget_simple_clock.example.class%
-#        arguments: [@service_id, "plain_value", %parameter%]

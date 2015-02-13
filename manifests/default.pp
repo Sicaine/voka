@@ -15,7 +15,7 @@ class { 'apache' :
 
 class { ['apache::mod::php', 'apache::mod::rewrite']: }
 
-apache::vhost { 'dashi' :
+apache::vhost { 'voka' :
    port => '80', 
    docroot => '/var/www/app/web',
    docroot_owner => 'www-data',
@@ -46,7 +46,7 @@ package {'php-apc': ensure => present }
 
 class { '::mysql::server':
   root_password    => 'root',
-  databases => { 'dashi' => {
+  databases => { 'voka' => {
       ensure => 'present',
       charset => 'utf8',
     }

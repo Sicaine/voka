@@ -16,8 +16,7 @@ class AppKernel extends Kernel
             new Symfony\Bundle\AsseticBundle\AsseticBundle(),
             new Doctrine\Bundle\DoctrineBundle\DoctrineBundle(),
             new Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle(),
-            new Dashi\DashboardBundle\DashiDashboardBundle(),
-            new Dashi\WidgetSimpleClockBundle\DashiWidgetSimpleClockBundle(),
+            new Voka\VokaBundle\VokaBundle()
         );
 
         if (in_array($this->getEnvironment(), array('dev', 'test'))) {

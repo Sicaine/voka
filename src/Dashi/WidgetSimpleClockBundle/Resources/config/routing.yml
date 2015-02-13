@@ -1,3 +1,0 @@
-dashi_widget_simple_clock_homepage:
-    pattern:  /hello/{name}
-    defaults: { _controller: DashiWidgetSimpleClockBundle:Default:index }

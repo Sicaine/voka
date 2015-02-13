@@ -1,7 +1,3 @@
-dashi_widget_simple_clock:
-    resource: "@DashiWidgetSimpleClockBundle/Resources/config/routing.yml"
-    prefix:   /
-
-dashi_dashboard:
-    resource: "@DashiDashboardBundle/Resources/config/routing.yml"
+voka_dashboard:
+    resource: "@VokaBundle/Resources/config/routing.yml"
     prefix:   /

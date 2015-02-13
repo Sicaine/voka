@@ -20,7 +20,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box = "Debian64"
 
   config.vm.provider "virtualbox" do |v|
-    v.name = "dashi vm"
+    v.name = "voka vm"
     v.memory = 512
   end
 
@@ -37,8 +37,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # Create a private network, which allows host-only access to the machine
   # using a specific IP.
-  config.vm.network :private_network, ip: "192.168.77.77"
+  config.vm.network :private_network, ip: "192.168.77.78"
 
+  config.vm.network :forwarded_port, guest: 80, host:80
   # Create a public network, which generally matched to bridged network.
   # Bridged networks make the machine appear as another physical device on
   # your network.
@@ -69,7 +70,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.provider :virtualbox do |vb|
   #
   #   # Use VBoxManage to customize the VM. For example to change memory:
-    vb.customize ["modifyvm", :id, "--memory", "1024"]
+    vb.customize ["modifyvm", :id, "--memory", "512"]
   end
   #
   # View the documentation for the provider you're using for more

@@ -1,0 +1,4 @@
+# Voka routing
+voka_homepage:
+    pattern:  /
+    defaults: { _controller: VokaBundle:Default:index }
