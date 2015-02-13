@@ -9,4 +9,10 @@ angular.module('Voka').controller('VokaCtrl', [
 
         console.log("working");
 
+        $document.bind('keypress', function(event) {
+
+            console.log(event.keyCode);
+
+        });
+
 }]);
