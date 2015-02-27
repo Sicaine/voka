@@ -1,0 +1,8 @@
+Voka\VokaBundle\Document\Wikibase:
+    fields:
+        id:
+            id:  true
+            type: string
+            strategy: NONE
+        data:
+          type: string

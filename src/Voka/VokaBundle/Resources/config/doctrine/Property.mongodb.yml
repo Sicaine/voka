@@ -1,0 +1,8 @@
+Voka\VokaBundle\Document\Property:
+    fields:
+        id:
+            id:  true
+            type: string
+            strategy: NONE
+        data:
+          type: string

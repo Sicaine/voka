@@ -3,83 +3,70 @@ namespace Voka\VokaBundle\Command;
 
 use Doctrine\ODM\MongoDB\DocumentManager;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Voka\VokaBundle\Document\Alias;
 use Voka\VokaBundle\Document\Country;
+use Voka\VokaBundle\Document\Property;
+use Voka\VokaBundle\Document\Wikibase;
 
 class GeoDataImporterCommand extends ContainerAwareCommand{
 
     private $countries = [];
+    private $wikibaseItems = [];
+    private $claimsPerCountry = [];
+    private $claims = [];
     const LOCAL_DEBUG = false;
     const ONLY_ONE_OBJ = false;
+    private $output;
 
     protected function configure(){
         $this->setName('voka:import:geodata');
+        $this->addOption('country', 'Q', InputArgument::OPTIONAL, 'Specify Country Code Q<XX..>');
+        $this->addOption('offline', 'o', InputArgument::OPTIONAL, 'Offline mode, will use static data - usefull for debugging');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output) {
 
-        if(self::LOCAL_DEBUG) {
-            foreach(json_decode($this->testdata) as $key=>$value){
+        $qCode = $input->getOption('country');
+        $offlineMode = $input->getOption('offline');
+        $this->output = $output;
 
+        if($offlineMode && is_null($qCode)){
+            $output->writeln('offline mode and qCode can\'t be used togehter. qCode will be ignored');
+        }
+
+        $output->writeln('Retrieve countries');
+        if($offlineMode) {
+            foreach(json_decode($this->testdata) as $key=>$value){
                 $this->countries['Q33'] = $value;
             }
         } else {
-            $output->writeln("Retrieving JSON Data from wmflabs");
-
-            $content = $this->getRAWDataFromUrl('http://wdq.wmflabs.org/api?q=TREE[6256][][31]');
-
-            $output->writeln("... retrieved.");
-
-            $output->writeln("Start decode JSON");
-            $result = json_decode($content);
-            $output->writeln("finished decode JSON");
-
-            $this->countries = [];
-
-            foreach ($result->items as $item) {
-                $this->countries['Q' . $item] = [];
-            }
-
-
-            $ids = [];
-
-            if(self::ONLY_ONE_OBJ){
-                foreach ($this->countries as $key => $value) {
-                    $ids[] = $key;
-                    $this->extractData($output, $ids);
-                    unset($ids);
-                    $ids = [];
-                    break;
-                }
-            } else {
-                $i = 1;
-                foreach ($this->countries as $key => $value) {
-                    $ids[] = $key;
-                    if ($i % 50 == 0) {
-                        $this->extractData($output, $ids);
-                        unset($ids);
-                        $ids = [];
-                        $i = 0;
-                    }
-                    $i++;
-                }
-                if (count($ids) > 0) {
-                    $this->extractData($output, $ids);
-                }
-            }
-
+            $this->retrieveCountries($qCode);
         }
 
         $output->writeln('Write countries to db');
 
+        $this->storeAllCollectedCountries();
+
+        $this->storeAllCollectedClaims();
+
+        $this->storeAllCollectedWikibaseItems();
+
+
+        $output->writeln("Done");
+    }
+
+    private function storeAllCollectedCountries(){
+
+        $this->output->write('Start saving all countries ');
+
         $dm = $this->getContainer()->get('doctrine_mongodb.odm.document_manager');
 
         foreach($this->countries as $key=>$value){
-
-            // only suspect a full countyr was loaded when following true:
-
+            $this->output->write('.');
+            // only suspect a full country was loaded when following true:
             if(!is_object($value) || !property_exists($value, 'title') ){
                 continue;
             }
@@ -103,10 +90,109 @@ class GeoDataImporterCommand extends ContainerAwareCommand{
             $dm->persist($doc);
 
         }
-
+        $this->output->write(' flushing');
         $dm->flush();
+        $this->output->write(' done.');
 
-        $output->writeln("Done");
+        $this->output->writeln(' finished');
+    }
+
+    private function storeAllCollectedClaims(){
+        $this->output->writeln('Start saving all claims');
+
+        $dm = $this->getContainer()->get('doctrine_mongodb.odm.document_manager');
+
+        foreach($this->claims as $key=>$value){
+            $this->output->write('.');
+
+            $doc = new Property();
+            $doc->setId($value->id);
+            $doc->setData(json_encode($value));
+            $dm->persist($doc);
+        }
+
+        $this->output->write(' flushing');
+        $dm->flush();
+        $this->output->writeln(' done.');
+
+        $this->output->writeln(' finished');
+    }
+
+    private function storeAllCollectedWikibaseItems(){
+        $this->output->writeln('Start saving all wikidata');
+
+        $dm = $this->getContainer()->get('doctrine_mongodb.odm.document_manager');
+
+        foreach($this->wikibaseItems as $key=>$value){
+            $this->output->write('.');
+
+            $doc = new Wikibase();
+            $doc->setId($value->id);
+            $doc->setData(json_encode($value));
+            $dm->persist($doc);
+        }
+
+        $this->output->write(' flushing');
+        $dm->flush();
+        $this->output->writeln(' done.');
+
+        $this->output->writeln(' finished');
+    }
+
+    private function retrieveCountries($qCode = null){
+
+
+        if($qCode !== null){
+            $this->countries['Q'. $qCode] = [];
+            $this->output->writeln("Created QCode entry for: ".$qCode);
+        } else {
+            $this->output->writeln("Retrieving JSON Data from wmflabs");
+
+            $content = $this->getRAWDataFromUrl('http://wdq.wmflabs.org/api?q=TREE[6256][][31]');
+
+            $this->output->writeln("... retrieved.");
+
+            $this->output->writeln("Start decode JSON");
+            $result = json_decode($content);
+            $this->output->writeln("finished decode JSON");
+
+            $this->countries = [];
+
+            foreach ($result->items as $item) {
+                $this->countries['Q' . $item] = [];
+            }
+        }
+
+        $ids = [];
+
+        if(self::ONLY_ONE_OBJ){
+            foreach ($this->countries as $key => $value) {
+                $ids[] = $key;
+                $this->retrieveEntityDataAndClaims($ids);
+                unset($ids);
+                break;
+            }
+        } else {
+            $i = 1;
+            foreach ($this->countries as $key => $value) {
+                if(substr($key, 1) < 816){
+                    continue;
+                }
+                $ids[] = $key;
+                if ($i % 50 == 0) {
+                    $this->retrieveEntityDataAndClaims($ids);
+                    unset($ids);
+                    $ids = [];
+                    $i = 0;
+                }
+                $i++;
+            }
+            if (count($ids) > 0) {
+                $this->retrieveEntityDataAndClaims($ids);
+            }
+        }
+
+
     }
 
     private function createAliases(DocumentManager $dm, $data){
@@ -134,18 +220,67 @@ class GeoDataImporterCommand extends ContainerAwareCommand{
         return $data;
     }
 
-    private function extractData(OutputInterface $output, $ids){
+    private function retrieveEntityDataAndClaims($ids){
         $idString = implode($ids, '|');
-        $output->writeln('extract Data for: '.$idString);
+        $this->output->writeln('retrieve EntityData for: '.$idString);
         $result = $this->getRAWDataFromUrl('https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids='.$idString);
         $entities = json_decode($result);
 
         foreach($entities->entities as $key=>$value){
-            $output->write('.');
+            $this->output->write('.');
             $this->countries[$key] = $value;
+
+            $claims = $this->retrieveClaims($key);
+            $claims = $claims->claims;
+            $this->claimsPerCountry[$key] = $claims;
+
+
+            foreach($claims as $claim){
+
+                if($claim[0]->mainsnak->snaktype !== 'novalue' && property_exists($claim[0]->mainsnak, 'datatype') && $claim[0]->mainsnak->datatype == 'wikibase-item') {
+                    $this->cacheWikiDataData('Q'.$claim[0]->mainsnak->datavalue->value->{'numeric-id'});
+                }
+
+
+                $this->cachePropertyData($claim[0]->mainsnak->property);
+            }
         }
 
-        $output->writeln('');
+        $this->output->writeln('');
+    }
+
+    private function retrieveClaims($id){
+        $this->output->write('. '.$id.' . ');
+        $this->output->writeln('retrieve ClaimData with id: '.$id);
+
+        $result = $this->getRAWDataFromUrl('https://www.wikidata.org/w/api.php?action=wbgetclaims&format=json&entity='.$id);
+        $claims = json_decode($result);
+
+        return $claims;
+    }
+
+    private function cachePropertyData($id){
+
+        if(!array_key_exists($id, $this->claims)){
+            $result = $this->getRAWDataFromUrl('https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids='.$id);
+            $blub = json_decode($result);
+            $propertyData = $blub->entities->$id;
+
+            $this->claims[$id] = $propertyData;
+
+        }
+    }
+
+    private function cacheWikiDataData($id){
+
+        if(!array_key_exists($id, $this->wikibaseItems)){
+            $result = $this->getRAWDataFromUrl('https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids='.$id);
+            $blub = json_decode($result);
+            $blub = $blub->entities->$id;
+
+            $this->wikibaseItems[$id] = $blub;
+
+        }
     }
 
 
