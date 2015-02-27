@@ -158,11 +158,11 @@ hhvm::config::port: 9090  # make sure that hhvm and php5-fpm ports don't collide
 #     comment: This example will have the hostname otherhostname2
 
 ## php
-#php::extensions:
-#  curl: {}
-#  json: {}
+php::extensions:
+  curl: {}
+  json: {}
 #  intl: {}
-#  mysql: {}
+  mysql: {}
 #  apc:
 #    package_prefix: php-
 #    settings:
