@@ -29,9 +29,6 @@ class UniqueEntityValidator extends ConstraintValidator
      */
     private $registry;
 
-    /**
-     * @param ManagerRegistry $registry
-     */
     public function __construct(ManagerRegistry $registry)
     {
         $this->registry = $registry;
@@ -46,6 +43,10 @@ class UniqueEntityValidator extends ConstraintValidator
      */
     public function validate($entity, Constraint $constraint)
     {
+        if (!$constraint instanceof UniqueEntity) {
+            throw new UnexpectedTypeException($constraint, __NAMESPACE__.'\UniqueEntity');
+        }
+
         if (!is_array($constraint->fields) && !is_string($constraint->fields)) {
             throw new UnexpectedTypeException($constraint->fields, 'array');
         }
@@ -64,7 +65,7 @@ class UniqueEntityValidator extends ConstraintValidator
             $em = $this->registry->getManager($constraint->em);
 
             if (!$em) {
-               throw new ConstraintDefinitionException(sprintf('Object manager "%s" does not exist.', $constraint->em));
+                throw new ConstraintDefinitionException(sprintf('Object manager "%s" does not exist.', $constraint->em));
             }
         } else {
             $em = $this->registry->getManagerForClass(get_class($entity));
@@ -89,7 +90,7 @@ class UniqueEntityValidator extends ConstraintValidator
                 return;
             }
 
-            if ($class->hasAssociation($fieldName)) {
+            if (null !== $criteria[$fieldName] && $class->hasAssociation($fieldName)) {
                 /* Ensure the Proxy is initialized before using reflection to
                  * read its identifiers. This is necessary because the wrapped
                  * getter methods in the Proxy are being bypassed.
@@ -101,7 +102,7 @@ class UniqueEntityValidator extends ConstraintValidator
 
                 if (count($relatedId) > 1) {
                     throw new ConstraintDefinitionException(
-                        "Associated entities are not allowed to have more than one identifier field to be " .
+                        "Associated entities are not allowed to have more than one identifier field to be ".
                         "part of a unique constraint in: ".$class->getName()."#".$fieldName
                     );
                 }
@@ -131,7 +132,11 @@ class UniqueEntityValidator extends ConstraintValidator
         }
 
         $errorPath = null !== $constraint->errorPath ? $constraint->errorPath : $fields[0];
+        $invalidValue = isset($criteria[$errorPath]) ? $criteria[$errorPath] : $criteria[$fields[0]];
 
-        $this->context->addViolationAt($errorPath, $constraint->message, array(), $criteria[$fields[0]]);
+        $this->buildViolation($constraint->message)
+            ->atPath($errorPath)
+            ->setInvalidValue($invalidValue)
+            ->addViolation();
     }
 }

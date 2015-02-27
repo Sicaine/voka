@@ -12,13 +12,15 @@
 namespace Symfony\Bundle\SecurityBundle\DependencyInjection;
 
 use Symfony\Bundle\SecurityBundle\DependencyInjection\Security\Factory\AbstractFactory;
-
+use Symfony\Component\Security\Core\Authorization\AccessDecisionManager;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 /**
- * This class contains the configuration information for the following tags:
+ * This class contains the configuration information.
+ *
+ * This information is for the following tags:
  *
  *   * security.config
  *   * security.acl
@@ -48,7 +50,7 @@ class MainConfiguration implements ConfigurationInterface
     /**
      * Generates the configuration tree builder.
      *
-     * @return \Symfony\Component\Config\Definition\Builder\TreeBuilder The tree builder
+     * @return TreeBuilder The tree builder
      */
     public function getConfigTreeBuilder()
     {
@@ -65,7 +67,7 @@ class MainConfiguration implements ConfigurationInterface
                 ->arrayNode('access_decision_manager')
                     ->addDefaultsIfNotSet()
                     ->children()
-                        ->scalarNode('strategy')->defaultValue('affirmative')->end()
+                        ->scalarNode('strategy')->defaultValue(AccessDecisionManager::STRATEGY_AFFIRMATIVE)->end()
                         ->booleanNode('allow_if_all_abstain')->defaultFalse()->end()
                         ->booleanNode('allow_if_equal_granted_denied')->defaultTrue()->end()
                     ->end()
@@ -201,6 +203,10 @@ class MainConfiguration implements ConfigurationInterface
         $firewallNodeBuilder
             ->scalarNode('pattern')->end()
             ->scalarNode('host')->end()
+            ->arrayNode('methods')
+                ->beforeNormalization()->ifString()->then(function ($v) { return preg_split('/\s*,\s*/', $v); })->end()
+                ->prototype('scalar')->end()
+            ->end()
             ->booleanNode('security')->defaultTrue()->end()
             ->scalarNode('request_matcher')->end()
             ->scalarNode('access_denied_url')->end()
@@ -337,11 +343,11 @@ class MainConfiguration implements ConfigurationInterface
                             'memory' => array(
                                 'users' => array(
                                     'foo' => array('password' => 'foo', 'roles' => 'ROLE_USER'),
-                                    'bar' => array('password' => 'bar', 'roles' => '[ROLE_USER, ROLE_ADMIN]')
+                                    'bar' => array('password' => 'bar', 'roles' => '[ROLE_USER, ROLE_ADMIN]'),
                                 ),
-                            )
+                            ),
                         ),
-                        'my_entity_provider' => array('entity' => array('class' => 'SecurityBundle:User', 'property' => 'username'))
+                        'my_entity_provider' => array('entity' => array('class' => 'SecurityBundle:User', 'property' => 'username')),
                     ))
                     ->disallowNewKeysInSubsequentConfigs()
                     ->isRequired()
@@ -398,8 +404,8 @@ class MainConfiguration implements ConfigurationInterface
                         'Acme\DemoBundle\Entity\User2' => array(
                             'algorithm' => 'sha512',
                             'encode_as_base64' => 'true',
-                            'iterations'=> 5000
-                        )
+                            'iterations' => 5000,
+                        ),
                     ))
                     ->requiresAtLeastOneElement()
                     ->useAttributeAsKey('class')

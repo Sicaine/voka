@@ -88,7 +88,8 @@ class MutableAclProviderTest extends \PHPUnit_Framework_TestCase
         try {
             $provider->findAcl($oid);
             $this->fail('ACL has not been properly deleted.');
-        } catch (AclNotFoundException $notFound) { }
+        } catch (AclNotFoundException $notFound) {
+        }
     }
 
     public function testDeleteAclDeletesChildren()
@@ -103,7 +104,8 @@ class MutableAclProviderTest extends \PHPUnit_Framework_TestCase
         try {
             $provider->findAcl(new ObjectIdentity(1, 'Foo'));
             $this->fail('Child-ACLs have not been deleted.');
-        } catch (AclNotFoundException $notFound) { }
+        } catch (AclNotFoundException $notFound) {
+        }
     }
 
     public function testFindAclsAddsPropertyListener()
@@ -148,7 +150,7 @@ class MutableAclProviderTest extends \PHPUnit_Framework_TestCase
             'parent' => array(
                 'object_identifier' => '1',
                 'class_type' => 'anotherFoo',
-            )
+            ),
         ));
 
         $propertyChanges = $this->getField($provider, 'propertyChanges');
@@ -288,7 +290,8 @@ class MutableAclProviderTest extends \PHPUnit_Framework_TestCase
         try {
             $provider->updateAcl($acl1);
             $this->fail('Provider failed to detect a concurrent modification.');
-        } catch (ConcurrentModificationException $ex) { }
+        } catch (ConcurrentModificationException $ex) {
+        }
     }
 
     public function testUpdateAcl()
@@ -407,7 +410,39 @@ class MutableAclProviderTest extends \PHPUnit_Framework_TestCase
         $provider->updateAcl($acl);
     }
 
+    public function testUpdateUserSecurityIdentity()
+    {
+        $provider = $this->getProvider();
+        $acl = $provider->createAcl(new ObjectIdentity(1, 'Foo'));
+        $sid = new UserSecurityIdentity('johannes', 'FooClass');
+        $acl->setEntriesInheriting(!$acl->isEntriesInheriting());
+
+        $acl->insertObjectAce($sid, 1);
+        $acl->insertClassAce($sid, 5, 0, false);
+        $acl->insertObjectAce($sid, 2, 1, true);
+        $acl->insertClassFieldAce('field', $sid, 2, 0, true);
+        $provider->updateAcl($acl);
+
+        $newSid = new UserSecurityIdentity('mathieu', 'FooClass');
+        $provider->updateUserSecurityIdentity($newSid, 'johannes');
+
+        $reloadProvider = $this->getProvider();
+        $reloadedAcl = $reloadProvider->findAcl(new ObjectIdentity(1, 'Foo'));
+
+        $this->assertNotSame($acl, $reloadedAcl);
+        $this->assertSame($acl->isEntriesInheriting(), $reloadedAcl->isEntriesInheriting());
+
+        $aces = $acl->getObjectAces();
+        $reloadedAces = $reloadedAcl->getObjectAces();
+        $this->assertEquals(count($aces), count($reloadedAces));
+        foreach ($reloadedAces as $ace) {
+            $this->assertTrue($ace->getSecurityIdentity()->equals($newSid));
+        }
+    }
+
     /**
+     * Imports acls.
+     *
      * Data must have the following format:
      * array(
      *     *name* => array(
@@ -419,6 +454,7 @@ class MutableAclProviderTest extends \PHPUnit_Framework_TestCase
      *
      * @param AclProvider $provider
      * @param array       $data
+     *
      * @throws \InvalidArgumentException
      * @throws \Exception
      */

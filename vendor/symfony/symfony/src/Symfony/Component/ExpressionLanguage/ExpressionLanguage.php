@@ -31,10 +31,17 @@ class ExpressionLanguage
 
     protected $functions = array();
 
-    public function __construct(ParserCacheInterface $cache = null)
+    /**
+     * @param ParserCacheInterface                  $cache
+     * @param ExpressionFunctionProviderInterface[] $providers
+     */
+    public function __construct(ParserCacheInterface $cache = null, array $providers = array())
     {
         $this->cache = $cache ?: new ArrayParserCache();
         $this->registerFunctions();
+        foreach ($providers as $provider) {
+            $this->registerProvider($provider);
+        }
     }
 
     /**
@@ -95,10 +102,24 @@ class ExpressionLanguage
      * @param string   $name      The function name
      * @param callable $compiler  A callable able to compile the function
      * @param callable $evaluator A callable able to evaluate the function
+     *
+     * @see ExpressionFunction
      */
     public function register($name, $compiler, $evaluator)
     {
         $this->functions[$name] = array('compiler' => $compiler, 'evaluator' => $evaluator);
+    }
+
+    public function addFunction(ExpressionFunction $function)
+    {
+        $this->register($function->getName(), $function->getCompiler(), $function->getEvaluator());
+    }
+
+    public function registerProvider(ExpressionFunctionProviderInterface $provider)
+    {
+        foreach ($provider->getFunctions() as $function) {
+            $this->addFunction($function);
+        }
     }
 
     protected function registerFunctions()

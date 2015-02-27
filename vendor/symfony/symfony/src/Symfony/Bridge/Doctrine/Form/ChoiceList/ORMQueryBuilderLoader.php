@@ -17,13 +17,13 @@ use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
 
 /**
- * Getting Entities through the ORM QueryBuilder
+ * Getting Entities through the ORM QueryBuilder.
  */
 class ORMQueryBuilderLoader implements EntityLoaderInterface
 {
     /**
      * Contains the query builder that builds the query for fetching the
-     * entities
+     * entities.
      *
      * This property should only be accessed through queryBuilder.
      *
@@ -32,7 +32,7 @@ class ORMQueryBuilderLoader implements EntityLoaderInterface
     private $queryBuilder;
 
     /**
-     * Construct an ORM Query Builder Loader
+     * Construct an ORM Query Builder Loader.
      *
      * @param QueryBuilder|\Closure $queryBuilder
      * @param EntityManager         $manager
@@ -64,7 +64,7 @@ class ORMQueryBuilderLoader implements EntityLoaderInterface
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function getEntities()
     {
@@ -72,7 +72,7 @@ class ORMQueryBuilderLoader implements EntityLoaderInterface
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function getEntitiesByIds($identifier, array $values)
     {
@@ -81,9 +81,18 @@ class ORMQueryBuilderLoader implements EntityLoaderInterface
         $parameter = 'ORMQueryBuilderLoader_getEntitiesByIds_'.$identifier;
         $where = $qb->expr()->in($alias.'.'.$identifier, ':'.$parameter);
 
+        // Guess type
+        $entity = current($qb->getRootEntities());
+        $metadata = $qb->getEntityManager()->getClassMetadata($entity);
+        if (in_array($metadata->getTypeOfField($identifier), array('integer', 'bigint', 'smallint'))) {
+            $parameterType = Connection::PARAM_INT_ARRAY;
+        } else {
+            $parameterType = Connection::PARAM_STR_ARRAY;
+        }
+
         return $qb->andWhere($where)
                   ->getQuery()
-                  ->setParameter($parameter, $values, Connection::PARAM_STR_ARRAY)
+                  ->setParameter($parameter, $values, $parameterType)
                   ->getResult();
     }
 }

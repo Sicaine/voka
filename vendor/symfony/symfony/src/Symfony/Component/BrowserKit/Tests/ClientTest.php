@@ -14,7 +14,6 @@ namespace Symfony\Component\BrowserKit\Tests;
 use Symfony\Component\BrowserKit\Client;
 use Symfony\Component\BrowserKit\History;
 use Symfony\Component\BrowserKit\CookieJar;
-use Symfony\Component\BrowserKit\Request;
 use Symfony\Component\BrowserKit\Response;
 
 class SpecialResponse extends Response
@@ -103,6 +102,14 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('http://example.com/', $client->getRequest()->getUri(), '->getCrawler() returns the Request of the last request');
     }
 
+    public function testGetRequestWithIpAsHost()
+    {
+        $client = new TestClient();
+        $client->request('GET', 'https://example.com/foo', array(), array(), array('HTTP_HOST' => '127.0.0.1'));
+
+        $this->assertEquals('https://127.0.0.1/foo', $client->getRequest()->getUri());
+    }
+
     public function testGetResponse()
     {
         $client = new TestClient();
@@ -160,6 +167,11 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $client->request('GET', 'https://www.example.com');
         $headers = $client->getRequest()->getServer();
         $this->assertTrue($headers['HTTPS'], '->request() sets the HTTPS header');
+
+        $client = new TestClient();
+        $client->request('GET', 'http://www.example.com:8080');
+        $headers = $client->getRequest()->getServer();
+        $this->assertEquals('www.example.com:8080', $headers['HTTP_HOST'], '->request() sets the HTTP_HOST header with port');
     }
 
     public function testRequestURIConversion()
@@ -195,6 +207,24 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $client->request('GET', 'http://www.example.com/foo/foobar');
         $client->request('GET', 'bar');
         $this->assertEquals('http://www.example.com/foo/bar', $client->getRequest()->getUri(), '->request() uses the previous request for relative URLs');
+    }
+
+    public function testRequestURIConversionByServerHost()
+    {
+        $client = new TestClient();
+
+        $server = array('HTTP_HOST' => 'www.exampl+e.com:8000');
+        $parameters = array();
+        $files = array();
+
+        $client->request('GET', 'http://exampl+e.com', $parameters, $files, $server);
+        $this->assertEquals('http://www.exampl+e.com:8000', $client->getRequest()->getUri(), '->request() uses HTTP_HOST to add port');
+
+        $client->request('GET', 'http://exampl+e.com:8888', $parameters, $files, $server);
+        $this->assertEquals('http://www.exampl+e.com:8000', $client->getRequest()->getUri(), '->request() uses HTTP_HOST to modify existing port');
+
+        $client->request('GET', 'http://exampl+e.com:8000', $parameters, $files, $server);
+        $this->assertEquals('http://www.exampl+e.com:8000', $client->getRequest()->getUri(), '->request() uses HTTP_HOST respects correct set port');
     }
 
     public function testRequestReferer()
@@ -336,6 +366,19 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         }
     }
 
+    public function testFollowRelativeRedirect()
+    {
+        $client = new TestClient();
+        $client->setNextResponse(new Response('', 302, array('Location' => '/redirected')));
+        $client->request('GET', 'http://www.example.com/foo/foobar');
+        $this->assertEquals('http://www.example.com/redirected', $client->getRequest()->getUri(), '->followRedirect() follows a redirect if any');
+
+        $client = new TestClient();
+        $client->setNextResponse(new Response('', 302, array('Location' => '/redirected:1234')));
+        $client->request('GET', 'http://www.example.com/foo/foobar');
+        $this->assertEquals('http://www.example.com/redirected:1234', $client->getRequest()->getUri(), '->followRedirect() follows relative urls');
+    }
+
     public function testFollowRedirectWithMaxRedirects()
     {
         $client = new TestClient();
@@ -380,7 +423,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $client = new TestClient();
         $client->followRedirects(false);
         $client->setNextResponse(new Response('', 302, array(
-            'Location'   => 'http://www.example.com/redirected',
+            'Location' => 'http://www.example.com/redirected',
             'Set-Cookie' => 'foo=bar',
         )));
         $client->request('GET', 'http://www.example.com/');
@@ -392,16 +435,16 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     public function testFollowRedirectWithHeaders()
     {
         $headers = array(
-            'HTTP_HOST'       => 'www.example.com',
+            'HTTP_HOST' => 'www.example.com',
             'HTTP_USER_AGENT' => 'Symfony2 BrowserKit',
-            'CONTENT_TYPE'    => 'application/vnd.custom+xml',
-            'HTTPS'           => false,
+            'CONTENT_TYPE' => 'application/vnd.custom+xml',
+            'HTTPS' => false,
         );
 
         $client = new TestClient();
         $client->followRedirects(false);
         $client->setNextResponse(new Response('', 302, array(
-            'Location'    => 'http://www.example.com/redirected',
+            'Location' => 'http://www.example.com/redirected',
         )));
         $client->request('GET', 'http://www.example.com/', array(), array(), array(
             'CONTENT_TYPE' => 'application/vnd.custom+xml',
@@ -412,6 +455,24 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $client->followRedirect();
 
         $headers['HTTP_REFERER'] = 'http://www.example.com/';
+
+        $this->assertEquals($headers, $client->getRequest()->getServer());
+    }
+
+    public function testFollowRedirectWithPort()
+    {
+        $headers = array(
+            'HTTP_HOST' => 'www.example.com:8080',
+            'HTTP_USER_AGENT' => 'Symfony2 BrowserKit',
+            'HTTPS' => false,
+            'HTTP_REFERER' => 'http://www.example.com:8080/',
+        );
+
+        $client = new TestClient();
+        $client->setNextResponse(new Response('', 302, array(
+            'Location' => 'http://www.example.com:8080/redirected',
+        )));
+        $client->request('GET', 'http://www.example.com:8080/');
 
         $this->assertEquals($headers, $client->getRequest()->getServer());
     }
@@ -525,5 +586,39 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 
         $client->setServerParameter('HTTP_USER_AGENT', 'testua');
         $this->assertEquals('testua', $client->getServerParameter('HTTP_USER_AGENT'));
+    }
+
+    public function testSetServerParameterInRequest()
+    {
+        $client = new TestClient();
+
+        $this->assertEquals('localhost', $client->getServerParameter('HTTP_HOST'));
+        $this->assertEquals('Symfony2 BrowserKit', $client->getServerParameter('HTTP_USER_AGENT'));
+
+        $client->request('GET', 'https://www.example.com/https/www.example.com', array(), array(), array(
+            'HTTP_HOST' => 'testhost',
+            'HTTP_USER_AGENT' => 'testua',
+            'HTTPS' => false,
+            'NEW_SERVER_KEY' => 'new-server-key-value',
+        ));
+
+        $this->assertEquals('localhost', $client->getServerParameter('HTTP_HOST'));
+        $this->assertEquals('Symfony2 BrowserKit', $client->getServerParameter('HTTP_USER_AGENT'));
+
+        $this->assertEquals('http://testhost/https/www.example.com', $client->getRequest()->getUri());
+
+        $server = $client->getRequest()->getServer();
+
+        $this->assertArrayHasKey('HTTP_USER_AGENT', $server);
+        $this->assertEquals('testua', $server['HTTP_USER_AGENT']);
+
+        $this->assertArrayHasKey('HTTP_HOST', $server);
+        $this->assertEquals('testhost', $server['HTTP_HOST']);
+
+        $this->assertArrayHasKey('NEW_SERVER_KEY', $server);
+        $this->assertEquals('new-server-key-value', $server['NEW_SERVER_KEY']);
+
+        $this->assertArrayHasKey('HTTPS', $server);
+        $this->assertFalse($server['HTTPS']);
     }
 }

@@ -19,9 +19,9 @@ profile::packages::names:
   - wget
   - curl
 
-profile::database::mysql: true
+profile::database::mysql: false
 profile::database::postgresql: false
-profile::database::mongodb: false
+profile::database::mongodb: true
 profile::database::redis: false
 profile::database::oracle_instantclient: false
 
@@ -55,7 +55,7 @@ profile::app::standalone_app: false  # proxy to an app that comes with a webserv
 ## puppet modules
 
 ## mysql
-mysql::server::root_password: root
+#mysql::server::root_password: root
 #component::mysql::databases:
 #  db_name:
 #    user: dev
@@ -64,11 +64,11 @@ mysql::server::root_password: root
 #    grant: ['ALL']
 
 ## mongodb
-# mongodb::server::smallfiles: true
-# component::mongodb::databases:
-#   db_name:
-#     user: dev
-#     password: dev
+mongodb::server::smallfiles: true
+component::mongodb::databases:
+  db_name:
+    user: dev
+    password: dev
 
 ## postgresql
 # component::postgresql::postgres_password: postgres
@@ -162,7 +162,8 @@ php::extensions:
   curl: {}
   json: {}
 #  intl: {}
-  mysql: {}
+#  mysql: {}
+  mongo: {}
 #  apc:
 #    package_prefix: php-
 #    settings:

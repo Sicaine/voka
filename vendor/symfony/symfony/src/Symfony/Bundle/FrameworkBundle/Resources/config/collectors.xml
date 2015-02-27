@@ -13,8 +13,6 @@
         <parameter key="data_collector.time.class">Symfony\Component\HttpKernel\DataCollector\TimeDataCollector</parameter>
         <parameter key="data_collector.memory.class">Symfony\Component\HttpKernel\DataCollector\MemoryDataCollector</parameter>
         <parameter key="data_collector.router.class">Symfony\Bundle\FrameworkBundle\DataCollector\RouterDataCollector</parameter>
-        <parameter key="data_collector.form.class">Symfony\Component\Form\Extension\DataCollector\FormDataCollector</parameter>
-        <parameter key="data_collector.form.extractor.class">Symfony\Component\Form\Extension\DataCollector\FormDataExtractor</parameter>
     </parameters>
 
     <services>
@@ -26,6 +24,10 @@
         <service id="data_collector.request" class="%data_collector.request.class%">
             <tag name="kernel.event_subscriber" />
             <tag name="data_collector" template="@WebProfiler/Collector/request.html.twig" id="request" priority="255" />
+        </service>
+
+        <service id="data_collector.ajax" class="Symfony\Bundle\FrameworkBundle\DataCollector\AjaxDataCollector" public="false">
+            <tag name="data_collector" template="@WebProfiler/Collector/ajax.html.twig" id="ajax" priority="255" />
         </service>
 
         <service id="data_collector.exception" class="%data_collector.exception.class%" public="false">
@@ -57,13 +59,5 @@
             <tag name="kernel.event_listener" event="kernel.controller" method="onKernelController"/>
             <tag name="data_collector" template="@WebProfiler/Collector/router.html.twig" id="router" priority="255" />
         </service>
-
-        <service id="data_collector.form.extractor" class="%data_collector.form.extractor.class%" />
-
-        <service id="data_collector.form" class="%data_collector.form.class%">
-            <tag name="data_collector" template="@WebProfiler/Collector/form.html.twig" id="form" priority="255" />
-            <argument type="service" id="data_collector.form.extractor" />
-        </service>
-
     </services>
 </container>

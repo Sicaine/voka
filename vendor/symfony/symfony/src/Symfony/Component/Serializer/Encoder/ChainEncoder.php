@@ -57,7 +57,7 @@ class ChainEncoder implements EncoderInterface
      *
      * @param string $format
      *
-     * @return Boolean
+     * @return bool
      */
     public function needsNormalization($format)
     {
@@ -80,6 +80,7 @@ class ChainEncoder implements EncoderInterface
      * @param string $format
      *
      * @return EncoderInterface
+     *
      * @throws RuntimeException if no encoder is found
      */
     private function getEncoder($format)

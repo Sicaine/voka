@@ -1,6 +1,28 @@
 CHANGELOG
 =========
 
+2.6.0
+-----
+
+ * Added helper commands (`server:start`, `server:stop` and `server:status`) to control the built-in web
+   server in the background
+ * Added `Controller::isCsrfTokenValid` helper
+ * Added configuration for the PropertyAccess component
+ * Added `Controller::redirectToRoute` helper
+ * Added `Controller::addFlash` helper
+ * Added `Controller::isGranted` helper
+ * Added `Controller::denyAccessUnlessGranted` helper
+ * Deprecated `app.security` in twig as `app.user` and `is_granted()` are already available
+
+2.5.0
+-----
+
+ * Added `translation:debug` command
+ * Added `--no-backup` option to `translation:update` command
+ * Added `config:debug` command
+ * Added `yaml:lint` command
+ * Deprecated the `RouterApacheDumperCommand` which will be removed in Symfony 3.0.
+
 2.4.0
 -----
 

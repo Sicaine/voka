@@ -246,14 +246,14 @@ class Command
      */
     public function execute()
     {
-        if (null === $this->errorHandler) {
+        if (null === $errorHandler = $this->errorHandler) {
             exec($this->join(), $output);
         } else {
             $process = proc_open($this->join(), array(0 => array('pipe', 'r'), 1 => array('pipe', 'w'), 2 => array('pipe', 'w')), $pipes);
             $output = preg_split('~(\r\n|\r|\n)~', stream_get_contents($pipes[1]), -1, PREG_SPLIT_NO_EMPTY);
 
             if ($error = stream_get_contents($pipes[2])) {
-                call_user_func($this->errorHandler, $error);
+                $errorHandler($error);
             }
 
             proc_close($process);
@@ -281,7 +281,7 @@ class Command
      * Insert a string or a Command instance before the bit at given position $index (index starts from 0).
      *
      * @param string|Command $bit
-     * @param integer        $index
+     * @param int            $index
      *
      * @return Command The current Command instance
      */

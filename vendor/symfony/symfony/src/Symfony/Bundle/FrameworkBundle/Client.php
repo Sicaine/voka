@@ -31,7 +31,7 @@ class Client extends BaseClient
     private $profiler = false;
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function __construct(KernelInterface $kernel, array $server = array(), History $history = null, CookieJar $cookieJar = null)
     {
@@ -160,8 +160,12 @@ class Client extends BaseClient
             $profilerCode = '$kernel->getContainer()->get(\'profiler\')->enable();';
         }
 
+        $errorReporting = error_reporting();
+
         $code = <<<EOF
 <?php
+
+error_reporting($errorReporting);
 
 if ('$autoloader') {
     require_once '$autoloader';

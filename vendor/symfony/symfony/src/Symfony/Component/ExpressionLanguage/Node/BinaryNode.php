@@ -16,15 +16,15 @@ use Symfony\Component\ExpressionLanguage\Compiler;
 class BinaryNode extends Node
 {
     private static $operators = array(
-        '~'   => '.',
+        '~' => '.',
         'and' => '&&',
-        'or'  => '||',
+        'or' => '||',
     );
 
     private static $functions = array(
-        '**'     => 'pow',
-        '..'     => 'range',
-        'in'     => 'in_array',
+        '**' => 'pow',
+        '..' => 'range',
+        'in' => 'in_array',
         'not in' => '!in_array',
     );
 
@@ -83,23 +83,30 @@ class BinaryNode extends Node
     {
         $operator = $this->attributes['operator'];
         $left = $this->nodes['left']->evaluate($functions, $values);
-        $right = $this->nodes['right']->evaluate($functions, $values);
 
         if (isset(self::$functions[$operator])) {
-            if ('not in' == $operator) {
-                return !call_user_func('in_array', $left, $right);
-            }
+            $right = $this->nodes['right']->evaluate($functions, $values);
 
-            return call_user_func(self::$functions[$operator], $left, $right);
+            if ('not in' === $operator) {
+                return !in_array($left, $right);
+            }
+            $f = self::$functions[$operator];
+
+            return $f($left, $right);
         }
 
         switch ($operator) {
             case 'or':
             case '||':
-                return $left || $right;
+                return $left || $this->nodes['right']->evaluate($functions, $values);
             case 'and':
             case '&&':
-                return $left && $right;
+                return $left && $this->nodes['right']->evaluate($functions, $values);
+        }
+
+        $right = $this->nodes['right']->evaluate($functions, $values);
+
+        switch ($operator) {
             case '|':
                 return $left | $right;
             case '^':

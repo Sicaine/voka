@@ -31,21 +31,23 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 class WebDebugToolbarListener implements EventSubscriberInterface
 {
     const DISABLED = 1;
-    const ENABLED  = 2;
+    const ENABLED = 2;
 
     protected $twig;
     protected $urlGenerator;
     protected $interceptRedirects;
     protected $mode;
     protected $position;
+    protected $excludedAjaxPaths;
 
-    public function __construct(\Twig_Environment $twig, $interceptRedirects = false, $mode = self::ENABLED, $position = 'bottom', UrlGeneratorInterface $urlGenerator = null)
+    public function __construct(\Twig_Environment $twig, $interceptRedirects = false, $mode = self::ENABLED, $position = 'bottom', UrlGeneratorInterface $urlGenerator = null, $excludedAjaxPaths = '^/bundles|^/_wdt')
     {
         $this->twig = $twig;
         $this->urlGenerator = $urlGenerator;
-        $this->interceptRedirects = (Boolean) $interceptRedirects;
-        $this->mode = (integer) $mode;
+        $this->interceptRedirects = (bool) $interceptRedirects;
+        $this->mode = (int) $mode;
         $this->position = $position;
+        $this->excludedAjaxPaths = $excludedAjaxPaths;
     }
 
     public function isEnabled()
@@ -76,7 +78,7 @@ class WebDebugToolbarListener implements EventSubscriberInterface
 
         if ($response->headers->has('X-Debug-Token') && $response->isRedirect() && $this->interceptRedirects) {
             $session = $request->getSession();
-            if ($session && $session->getFlashBag() instanceof AutoExpireFlashBag) {
+            if (null !== $session && $session->isStarted() && $session->getFlashBag() instanceof AutoExpireFlashBag) {
                 // keep current flashes for one more request if using AutoExpireFlashBag
                 $session->getFlashBag()->setAll($session->getFlashBag()->peekAll());
             }
@@ -105,26 +107,19 @@ class WebDebugToolbarListener implements EventSubscriberInterface
      */
     protected function injectToolbar(Response $response)
     {
-        if (function_exists('mb_stripos')) {
-            $posrFunction   = 'mb_strripos';
-            $substrFunction = 'mb_substr';
-        } else {
-            $posrFunction   = 'strripos';
-            $substrFunction = 'substr';
-        }
-
         $content = $response->getContent();
-        $pos = $posrFunction($content, '</body>');
+        $pos = strripos($content, '</body>');
 
         if (false !== $pos) {
             $toolbar = "\n".str_replace("\n", '', $this->twig->render(
                 '@WebProfiler/Profiler/toolbar_js.html.twig',
                 array(
                     'position' => $this->position,
+                    'excluded_ajax_paths' => $this->excludedAjaxPaths,
                     'token' => $response->headers->get('X-Debug-Token'),
                 )
             ))."\n";
-            $content = $substrFunction($content, 0, $pos).$toolbar.$substrFunction($content, $pos);
+            $content = substr($content, 0, $pos).$toolbar.substr($content, $pos);
             $response->setContent($content);
         }
     }

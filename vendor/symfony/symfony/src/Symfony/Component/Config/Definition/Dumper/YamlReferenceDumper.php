@@ -14,7 +14,6 @@ namespace Symfony\Component\Config\Definition\Dumper;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\Definition\NodeInterface;
 use Symfony\Component\Config\Definition\ArrayNode;
-use Symfony\Component\Config\Definition\ScalarNode;
 use Symfony\Component\Config\Definition\EnumNode;
 use Symfony\Component\Config\Definition\PrototypedArrayNode;
 use Symfony\Component\Yaml\Inline;
@@ -45,7 +44,7 @@ class YamlReferenceDumper
 
     /**
      * @param NodeInterface $node
-     * @param integer       $depth
+     * @param int           $depth
      */
     private function writeNode(NodeInterface $node, $depth = 0)
     {
@@ -126,7 +125,7 @@ class YamlReferenceDumper
         if ($info = $node->getInfo()) {
             $this->writeLine('');
             // indenting multi-line info
-            $info = str_replace("\n", sprintf("\n%".$depth * 4 . "s# ", ' '), $info);
+            $info = str_replace("\n", sprintf("\n%".($depth * 4)."s# ", ' '), $info);
             $this->writeLine('# '.$info, $depth * 4);
         }
 

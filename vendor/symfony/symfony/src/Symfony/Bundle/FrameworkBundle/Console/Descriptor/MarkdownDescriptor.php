@@ -15,11 +15,15 @@ use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
+use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 
 /**
  * @author Jean-François Simon <jeanfrancois.simon@sensiolabs.com>
+ *
+ * @internal
  */
 class MarkdownDescriptor extends Descriptor
 {
@@ -49,14 +53,15 @@ class MarkdownDescriptor extends Descriptor
         unset($requirements['_scheme'], $requirements['_method']);
 
         $output = '- Path: '.$route->getPath()
+            ."\n".'- Path Regex: '.$route->compile()->getRegex()
             ."\n".'- Host: '.('' !== $route->getHost() ? $route->getHost() : 'ANY')
+            ."\n".'- Host Regex: '.('' !== $route->getHost() ? $route->compile()->getHostRegex() : '')
             ."\n".'- Scheme: '.($route->getSchemes() ? implode('|', $route->getSchemes()) : 'ANY')
             ."\n".'- Method: '.($route->getMethods() ? implode('|', $route->getMethods()) : 'ANY')
             ."\n".'- Class: '.get_class($route)
             ."\n".'- Defaults: '.$this->formatRouterConfig($route->getDefaults())
-            ."\n".'- Requirements: '.$this->formatRouterConfig($requirements) ?: 'NONE'
-            ."\n".'- Options: '.$this->formatRouterConfig($route->getOptions())
-            ."\n".'- Path-Regex: '.$route->compile()->getRegex();
+            ."\n".'- Requirements: '.($requirements ? $this->formatRouterConfig($requirements) : 'NO CUSTOM')
+            ."\n".'- Options: '.$this->formatRouterConfig($route->getOptions());
 
         $this->write(isset($options['name'])
             ? $options['name']."\n".str_repeat('-', strlen($options['name']))."\n\n".$output
@@ -176,10 +181,40 @@ class MarkdownDescriptor extends Descriptor
         $output = '- Class: `'.$definition->getClass().'`'
             ."\n".'- Scope: `'.$definition->getScope().'`'
             ."\n".'- Public: '.($definition->isPublic() ? 'yes' : 'no')
-            ."\n".'- Synthetic: '.($definition->isSynthetic() ? 'yes' : 'no');
+            ."\n".'- Synthetic: '.($definition->isSynthetic() ? 'yes' : 'no')
+            ."\n".'- Lazy: '.($definition->isLazy() ? 'yes' : 'no')
+            ."\n".'- Synchronized: '.($definition->isSynchronized() ? 'yes' : 'no')
+            ."\n".'- Abstract: '.($definition->isAbstract() ? 'yes' : 'no');
 
         if ($definition->getFile()) {
             $output .= "\n".'- File: `'.$definition->getFile().'`';
+        }
+
+        if ($definition->getFactoryClass()) {
+            $output .= "\n".'- Factory Class: `'.$definition->getFactoryClass().'`';
+        }
+
+        if ($definition->getFactoryService()) {
+            $output .= "\n".'- Factory Service: `'.$definition->getFactoryService().'`';
+        }
+
+        if ($definition->getFactoryMethod()) {
+            $output .= "\n".'- Factory Method: `'.$definition->getFactoryMethod().'`';
+        }
+
+        if ($factory = $definition->getFactory()) {
+            if (is_array($factory)) {
+                if ($factory[0] instanceof Reference) {
+                    $output .= "\n".'- Factory Service: `'.$factory[0].'`';
+                } elseif ($factory[0] instanceof Definition) {
+                    throw new \InvalidArgumentException('Factory is not describable.');
+                } else {
+                    $output .= "\n".'- Factory Class: `'.$factory[0].'`';
+                }
+                $output .= "\n".'- Factory Method: `'.$factory[1].'`';
+            } else {
+                $output .= "\n".'- Factory Function: `'.$factory.'`';
+            }
         }
 
         if (!(isset($options['omit_tags']) && $options['omit_tags'])) {
@@ -207,6 +242,114 @@ class MarkdownDescriptor extends Descriptor
         $this->write(isset($options['id']) ? sprintf("%s\n%s\n\n%s\n", $options['id'], str_repeat('~', strlen($options['id'])), $output) : $output);
     }
 
+    /**
+     * {@inheritdoc}
+     */
+    protected function describeContainerParameter($parameter, array $options = array())
+    {
+        $this->write(isset($options['parameter']) ? sprintf("%s\n%s\n\n%s", $options['parameter'], str_repeat('=', strlen($options['parameter'])), $this->formatParameter($parameter)) : $parameter);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function describeEventDispatcherListeners(EventDispatcherInterface $eventDispatcher, array $options = array())
+    {
+        $event = array_key_exists('event', $options) ? $options['event'] : null;
+
+        $title = 'Registered listeners';
+        if (null !== $event) {
+            $title .= sprintf(' for event `%s` ordered by descending priority', $event);
+        }
+
+        $this->write(sprintf('# %s', $title)."\n");
+
+        $registeredListeners = $eventDispatcher->getListeners($event);
+        if (null !== $event) {
+            foreach ($registeredListeners as $order => $listener) {
+                $this->write("\n".sprintf('## Listener %d', $order + 1)."\n");
+                $this->describeCallable($listener);
+            }
+        } else {
+            ksort($registeredListeners);
+
+            foreach ($registeredListeners as $eventListened => $eventListeners) {
+                $this->write("\n".sprintf('## %s', $eventListened)."\n");
+
+                foreach ($eventListeners as $order => $eventListener) {
+                    $this->write("\n".sprintf('### Listener %d', $order + 1)."\n");
+                    $this->describeCallable($eventListener);
+                }
+            }
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function describeCallable($callable, array $options = array())
+    {
+        $string = '';
+
+        if (is_array($callable)) {
+            $string .= "\n- Type: `function`";
+
+            if (is_object($callable[0])) {
+                $string .= "\n".sprintf('- Name: `%s`', $callable[1]);
+                $string .= "\n".sprintf('- Class: `%s`', get_class($callable[0]));
+            } else {
+                if (0 !== strpos($callable[1], 'parent::')) {
+                    $string .= "\n".sprintf('- Name: `%s`', $callable[1]);
+                    $string .= "\n".sprintf('- Class: `%s`', $callable[0]);
+                    $string .= "\n- Static: yes";
+                } else {
+                    $string .= "\n".sprintf('- Name: `%s`', substr($callable[1], 8));
+                    $string .= "\n".sprintf('- Class: `%s`', $callable[0]);
+                    $string .= "\n- Static: yes";
+                    $string .= "\n- Parent: yes";
+                }
+            }
+
+            return $this->write($string."\n");
+        }
+
+        if (is_string($callable)) {
+            $string .= "\n- Type: `function`";
+
+            if (false === strpos($callable, '::')) {
+                $string .= "\n".sprintf('- Name: `%s`', $callable);
+            } else {
+                $callableParts = explode('::', $callable);
+
+                $string .= "\n".sprintf('- Name: `%s`', $callableParts[1]);
+                $string .= "\n".sprintf('- Class: `%s`', $callableParts[0]);
+                $string .= "\n- Static: yes";
+            }
+
+            return $this->write($string."\n");
+        }
+
+        if ($callable instanceof \Closure) {
+            $string .= "\n- Type: `closure`";
+
+            return $this->write($string."\n");
+        }
+
+        if (method_exists($callable, '__invoke')) {
+            $string .= "\n- Type: `object`";
+            $string .= "\n".sprintf('- Name: `%s`', get_class($callable));
+
+            return $this->write($string."\n");
+        }
+
+        throw new \InvalidArgumentException('Callable is not describable.');
+    }
+
+    /**
+     * @param array $array
+     *
+     * @return string
+     */
     private function formatRouterConfig(array $array)
     {
         if (!count($array)) {

@@ -18,10 +18,13 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\DependencyInjection\ContainerAware;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Form\FormTypeInterface;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormBuilder;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 
 /**
@@ -36,9 +39,9 @@ class Controller extends ContainerAware
     /**
      * Generates a URL from the given parameters.
      *
-     * @param string         $route         The name of the route
-     * @param mixed          $parameters    An array of parameters
-     * @param Boolean|string $referenceType The type of reference (one of the constants in UrlGeneratorInterface)
+     * @param string      $route         The name of the route
+     * @param mixed       $parameters    An array of parameters
+     * @param bool|string $referenceType The type of reference (one of the constants in UrlGeneratorInterface)
      *
      * @return string The generated URL
      *
@@ -61,7 +64,7 @@ class Controller extends ContainerAware
     public function forward($controller, array $path = array(), array $query = array())
     {
         $path['_controller'] = $controller;
-        $subRequest = $this->container->get('request')->duplicate($query, null, $path);
+        $subRequest = $this->container->get('request_stack')->getCurrentRequest()->duplicate($query, null, $path);
 
         return $this->container->get('http_kernel')->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
     }
@@ -69,14 +72,80 @@ class Controller extends ContainerAware
     /**
      * Returns a RedirectResponse to the given URL.
      *
-     * @param string  $url    The URL to redirect to
-     * @param integer $status The status code to use for the Response
+     * @param string $url    The URL to redirect to
+     * @param int    $status The status code to use for the Response
      *
      * @return RedirectResponse
      */
     public function redirect($url, $status = 302)
     {
         return new RedirectResponse($url, $status);
+    }
+
+    /**
+     * Returns a RedirectResponse to the given route with the given parameters.
+     *
+     * @param string $route      The name of the route
+     * @param array  $parameters An array of parameters
+     * @param int    $status     The status code to use for the Response
+     *
+     * @return RedirectResponse
+     */
+    protected function redirectToRoute($route, array $parameters = array(), $status = 302)
+    {
+        return $this->redirect($this->generateUrl($route, $parameters), $status);
+    }
+
+    /**
+     * Adds a flash message to the current session for type.
+     *
+     * @param string $type    The type
+     * @param string $message The message
+     *
+     * @throws \LogicException
+     */
+    protected function addFlash($type, $message)
+    {
+        if (!$this->container->has('session')) {
+            throw new \LogicException('You can not use the addFlash method if sessions are disabled.');
+        }
+
+        $this->container->get('session')->getFlashBag()->add($type, $message);
+    }
+
+    /**
+     * Checks if the attributes are granted against the current authentication token and optionally supplied object.
+     *
+     * @param mixed $attributes The attributes
+     * @param mixed $object     The object
+     *
+     * @throws \LogicException
+     * @return bool
+     */
+    protected function isGranted($attributes, $object = null)
+    {
+        if (!$this->container->has('security.authorization_checker')) {
+            throw new \LogicException('The SecurityBundle is not registered in your application.');
+        }
+
+        return $this->container->get('security.authorization_checker')->isGranted($attributes, $object);
+    }
+
+    /**
+     * Throws an exception unless the attributes are granted against the current authentication token and optionally
+     * supplied object.
+     *
+     * @param mixed  $attributes The attributes
+     * @param mixed  $object     The object
+     * @param string $message    The message passed to the exception
+     *
+     * @throws AccessDeniedException
+     */
+    protected function denyAccessUnlessGranted($attributes, $object = null, $message = 'Access Denied.')
+    {
+        if (!$this->isGranted($attributes, $object)) {
+            throw $this->createAccessDeniedException($message);
+        }
     }
 
     /**
@@ -139,14 +208,31 @@ class Controller extends ContainerAware
      *
      *     throw $this->createNotFoundException('Page not found!');
      *
-     * @param string    $message  A message
-     * @param \Exception $previous The previous exception
+     * @param string          $message  A message
+     * @param \Exception|null $previous The previous exception
      *
      * @return NotFoundHttpException
      */
     public function createNotFoundException($message = 'Not Found', \Exception $previous = null)
     {
         return new NotFoundHttpException($message, $previous);
+    }
+
+    /**
+     * Returns an AccessDeniedException.
+     *
+     * This will result in a 403 response code. Usage example:
+     *
+     *     throw $this->createAccessDeniedException('Unable to access this page!');
+     *
+     * @param string          $message  A message
+     * @param \Exception|null $previous The previous exception
+     *
+     * @return AccessDeniedException
+     */
+    public function createAccessDeniedException($message = 'Access Denied', \Exception $previous = null)
+    {
+        return new AccessDeniedException($message, $previous);
     }
 
     /**
@@ -164,7 +250,7 @@ class Controller extends ContainerAware
     }
 
     /**
-     * Creates and returns a form builder instance
+     * Creates and returns a form builder instance.
      *
      * @param mixed $data    The initial data for the form
      * @param array $options Options for the form
@@ -207,26 +293,27 @@ class Controller extends ContainerAware
     }
 
     /**
-     * Get a user from the Security Context
+     * Get a user from the Security Token Storage.
      *
      * @return mixed
      *
      * @throws \LogicException If SecurityBundle is not available
      *
-     * @see Symfony\Component\Security\Core\Authentication\Token\TokenInterface::getUser()
+     * @see TokenInterface::getUser()
      */
     public function getUser()
     {
-        if (!$this->container->has('security.context')) {
+        if (!$this->container->has('security.token_storage')) {
             throw new \LogicException('The SecurityBundle is not registered in your application.');
         }
 
-        if (null === $token = $this->container->get('security.context')->getToken()) {
-            return null;
+        if (null === $token = $this->container->get('security.token_storage')->getToken()) {
+            return;
         }
 
         if (!is_object($user = $token->getUser())) {
-            return null;
+            // e.g. anonymous authentication
+            return;
         }
 
         return $user;
@@ -237,7 +324,7 @@ class Controller extends ContainerAware
      *
      * @param string $id The service id
      *
-     * @return Boolean true if the service id is defined, false otherwise
+     * @return bool true if the service id is defined, false otherwise
      */
     public function has($id)
     {
@@ -254,5 +341,22 @@ class Controller extends ContainerAware
     public function get($id)
     {
         return $this->container->get($id);
+    }
+
+    /**
+     * Checks the validity of a CSRF token
+     *
+     * @param string $id    The id used when generating the token
+     * @param string $token The actual token sent with the request that should be validated
+     *
+     * @return bool
+     */
+    protected function isCsrfTokenValid($id, $token)
+    {
+        if (!$this->container->has('security.csrf.token_manager')) {
+            throw new \LogicException('CSRF protection is not enabled in your application.');
+        }
+
+        return $this->container->get('security.csrf.token_manager')->isTokenValid(new CsrfToken($id, $token));
     }
 }
