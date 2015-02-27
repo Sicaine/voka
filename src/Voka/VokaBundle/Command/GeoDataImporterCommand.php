@@ -6,43 +6,37 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class GeoDataImporterCommand extends ContainerAwareCommand{
+
+    private $countries = [];
+
     protected function configure(){
         $this->setName('voka:import:geodata');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output){
+        $output->writeln("Retrieving JSON Data from wmflabs");
 
-        /* gets the data from a URL */
-        function get_data($url) {
-            $ch = curl_init();
-            $timeout = 5;
-            curl_setopt($ch, CURLOPT_URL, $url);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
-            $data = curl_exec($ch);
-            curl_close($ch);
-            return $data;
-        }
+        $content = $this->getRAWDataFromUrl('http://wdq.wmflabs.org/api?q=TREE[6256][][31]');
 
-        echo '.';
-        $content = get_data('http://wdq.wmflabs.org/api?q=TREE[6256][][31]');
-        echo '.';
+        $output->writeln("... retrieved.");
+
+        $output->writeln("Start decode JSON");
         $result = json_decode($content);
-        echo substr($content, 50)."\n";
+        $output->writeln("finished decode JSON");
 
-        $countries = [];
-#var_dump($result);
+        $this->countries = [];
+
         foreach($result->items as $item) {
-            $countries['Q'.$item] = [];
+            $this->countries['Q'.$item] = [];
         }
 
         $ids = [];
 
         $i = 1;
-        foreach($countries as $key=>$value){
+        foreach($this->countries as $key=>$value){
             $ids[] = $key;
             if($i % 50 == 0){
-                extractData($ids);
+                $this->extractData($output, $ids);
                 unset($ids);
                 $ids = [];
                 $i = 0;
@@ -50,30 +44,37 @@ class GeoDataImporterCommand extends ContainerAwareCommand{
             $i++;
         }
         if(count($ids) > 0)
-            extractData($ids);
+            $this->extractData($output, $ids);
 
-        function extractData($ids){
-            global $countries;
-            $idString = implode($ids, '|');
-            echo 'extract Data for: '.$idString;
-            $result = get_data('https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids='.$idString);
-            $entities = json_decode($result);
-
-            echo "\n";
-            foreach($entities->entities as $key=>$value){
-                echo '.';
-                $countries[$key] = $value;
-            }
-        }
 
         echo "\n";
-        echo json_encode($countries, JSON_PRETTY_PRINT);
+        echo json_encode($this->countries, JSON_PRETTY_PRINT);
 
-
-
-
-
-        $output->writeln("blub");
+        $output->writeln("Done");
     }
 
+    private function getRAWDataFromUrl($url) {
+        $ch = curl_init();
+        $timeout = 5;
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
+        $data = curl_exec($ch);
+        curl_close($ch);
+        return $data;
+    }
+
+    private function extractData(OutputInterface $output, $ids){
+        $idString = implode($ids, '|');
+        $output->writeln('extract Data for: '.$idString);
+        $result = $this->getRAWDataFromUrl('https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids='.$idString);
+        $entities = json_decode($result);
+
+        foreach($entities->entities as $key=>$value){
+            $output->write('.');
+            $this->countries[$key] = $value;
+        }
+
+        $output->writeln('');
+    }
 } 
