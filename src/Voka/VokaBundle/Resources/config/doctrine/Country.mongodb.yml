@@ -1,0 +1,22 @@
+Voka\VokaBundle\Document\Country:
+    fields:
+        id:
+            id:  true
+            type: string
+            strategy: NONE
+        title:
+            type: string
+        type:
+            type: string
+        modified:
+            type: string
+        aliases:
+            type: collection
+        labels:
+            type: collection
+        descriptions:
+            type: collection
+        claims:
+            type: collection
+        sitelinks:
+            type: collection

@@ -1,0 +1,9 @@
+Voka\VokaBundle\Document\Alias:
+    fields:
+        id:
+            id: true
+            strategy: AUTO
+        language:
+            type: string
+        keyvalue:
+            type: collection
