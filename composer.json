@@ -12,6 +12,7 @@
         "doctrine/orm": "~2.2,>=2.2.3",
         "doctrine/mongodb-odm": "1.0.*@dev",
         "doctrine/mongodb-odm-bundle": "3.0.*@dev",
+        "jms/serializer-bundle": "0.13",
         "doctrine/doctrine-bundle": "~1.2",
         "twig/extensions": "~1.0",
         "symfony/assetic-bundle": "~2.3",
