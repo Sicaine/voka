@@ -56,7 +56,7 @@ class GeoDataDeNormalizeCommand extends ContainerAwareCommand{
             }
 
             $countryCard->setLabel($label);
-            
+
             if(array_key_exists('P17', $claims)) {
                 $countryCard->setName($claims['P17']);
             }
