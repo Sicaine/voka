@@ -19,7 +19,7 @@ profile::packages::names:
   - wget
   - curl
 
-profile::database::mysql: false
+profile::database::mysql: true
 profile::database::postgresql: false
 profile::database::mongodb: true
 profile::database::redis: false
@@ -55,13 +55,13 @@ profile::app::standalone_app: false  # proxy to an app that comes with a webserv
 ## puppet modules
 
 ## mysql
-#mysql::server::root_password: root
-#component::mysql::databases:
-#  db_name:
-#    user: dev
-#    password: dev
-#    host: localhost
-#    grant: ['ALL']
+mysql::server::root_password: root
+component::mysql::databases:
+  vokadb:
+    user: dev
+    password: dev
+    host: localhost
+    grant: ['ALL']
 
 ## mongodb
 mongodb::server::smallfiles: true

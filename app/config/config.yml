@@ -60,3 +60,19 @@ swiftmailer:
     username:  "%mailer_user%"
     password:  "%mailer_password%"
     spool:     { type: memory }
+
+# Doctrine Configuration
+doctrine:
+    dbal:
+        driver: mysqli
+        host: 127.0.0.1
+        port: ~
+        dbname: vokadb
+        user: dev
+        password: dev
+        charset: UTF8
+        mapping_types:
+          enum: string
+    orm:
+        auto_generate_proxy_classes: "%kernel.debug%"
+        auto_mapping: true
