@@ -23,6 +23,21 @@ final class VokaCountryCard
     protected $name;
 
     /**
+     * @ORM\Column(type="string", length=200, nullable=true)
+     */
+    protected $capital;
+
+    /**
+     * @ORM\Column(type="string", length=200, nullable=true)
+     */
+    protected $continent;
+
+    /**
+     * @ORM\Column(type="string", length=200, nullable=true)
+     */
+    protected $population;
+
+    /**
      * @return mixed
      */
     public function getId() {
@@ -48,6 +63,48 @@ final class VokaCountryCard
      */
     public function setName($name) {
         $this->name = $name;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCapital() {
+        return $this->capital;
+    }
+
+    /**
+     * @param mixed $capital
+     */
+    public function setCapital($capital) {
+        $this->capital = $capital;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getContinent() {
+        return $this->continent;
+    }
+
+    /**
+     * @param mixed $continent
+     */
+    public function setContinent($continent) {
+        $this->continent = $continent;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPopulation() {
+        return $this->population;
+    }
+
+    /**
+     * @param mixed $population
+     */
+    public function setPopulation($population) {
+        $this->population = $population;
     }
 
 

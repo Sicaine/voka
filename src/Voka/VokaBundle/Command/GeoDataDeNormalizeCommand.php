@@ -60,6 +60,18 @@ class GeoDataDeNormalizeCommand extends ContainerAwareCommand{
                 $countryCard->setName($claims['P17']);
             }
 
+            if(array_key_exists('P36', $claims)) {
+                $countryCard->setCapital($claims['P36']);
+            }
+
+            if(array_key_exists('P30', $claims)) {
+                $countryCard->setContinent($claims['P30']);
+            }
+
+            if(array_key_exists('P1082', $claims)) {
+                $countryCard->setPopulation($claims['P1082']);
+            }
+
             $ormEm->persist($countryCard);
         }
         $ormEm->flush();
