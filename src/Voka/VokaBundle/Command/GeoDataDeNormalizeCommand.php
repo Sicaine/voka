@@ -153,14 +153,18 @@ class GeoDataDeNormalizeCommand extends ContainerAwareCommand{
     }
 
     private function findLabelFromCountry(Country $country){
+        $label = '';
         foreach($country->getLabels() as $key=>$value){
+            if(empty($label) && $value['language'] === 'en') {
+                $label = $value['value'];
+            }
             // stop when found ger
-            if($value['language'] == 'de') {
-                return $value['value'];
+            if($value['language'] === 'de') {
+                $label = $value['value'];
             }
         }
 
-        return '';
+        return $label;
     }
 
 } 
