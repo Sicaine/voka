@@ -25,6 +25,11 @@ final class VokaCountryCard
     /**
      * @ORM\Column(type="string", length=200, nullable=true)
      */
+    protected $label;
+
+    /**
+     * @ORM\Column(type="string", length=200, nullable=true)
+     */
     protected $capital;
 
     /**
@@ -105,6 +110,20 @@ final class VokaCountryCard
      */
     public function setPopulation($population) {
         $this->population = $population;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLabel() {
+        return $this->label;
+    }
+
+    /**
+     * @param mixed $label
+     */
+    public function setLabel($label) {
+        $this->label = $label;
     }
 
 
