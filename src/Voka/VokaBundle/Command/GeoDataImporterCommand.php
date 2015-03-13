@@ -10,6 +10,7 @@ use Voka\VokaBundle\Document\Alias;
 use Voka\VokaBundle\Document\Country;
 use Voka\VokaBundle\Document\Property;
 use Voka\VokaBundle\Document\Wikibase;
+use Voka\VokaBundle\Document\WikibaseImage;
 
 class GeoDataImporterCommand extends ContainerAwareCommand{
 
@@ -17,6 +18,7 @@ class GeoDataImporterCommand extends ContainerAwareCommand{
     private $wikibaseItems = [];
     private $claimsPerCountry = [];
     private $claims = [];
+    private $wikibaseFlagImages = [];
     const LOCAL_DEBUG = false;
     const ONLY_ONE_OBJ = false;
     private $output;
@@ -53,6 +55,8 @@ class GeoDataImporterCommand extends ContainerAwareCommand{
         $this->storeAllCollectedClaims();
 
         $this->storeAllCollectedWikibaseItems();
+
+        $this->storeAllCollectedWikibaseFlagItems();
 
 
         $output->writeln("Done");
@@ -139,6 +143,27 @@ class GeoDataImporterCommand extends ContainerAwareCommand{
         $this->output->writeln(' finished');
     }
 
+    private function storeAllCollectedWikibaseFlagItems(){
+        $this->output->writeln('Start saving all wikidataFlags');
+
+        $dm = $this->getContainer()->get('doctrine_mongodb.odm.document_manager');
+
+        foreach($this->wikibaseFlagImages as $key=>$value){
+            $this->output->write('.');
+
+            $doc = new WikibaseImage();
+            $doc->setId($key);
+            $doc->setData($value);
+            $dm->persist($doc);
+        }
+
+        $this->output->write(' flushing');
+        $dm->flush();
+        $this->output->writeln(' done.');
+
+        $this->output->writeln(' finished');
+    }
+
     private function retrieveCountries($qCode = null){
 
 
@@ -212,6 +237,7 @@ class GeoDataImporterCommand extends ContainerAwareCommand{
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
+        curl_setopt($ch,CURLOPT_USERAGENT,'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13');
         $data = curl_exec($ch);
         curl_close($ch);
         return $data;
@@ -264,7 +290,9 @@ class GeoDataImporterCommand extends ContainerAwareCommand{
                 }
 
                 if($latestClaim != null && $latestClaim->mainsnak->snaktype !== 'novalue' && property_exists($latestClaim->mainsnak, 'datatype') && $latestClaim->mainsnak->datatype == 'wikibase-item') {
-                    $this->cacheWikiDataData('Q'.$latestClaim->mainsnak->datavalue->value->{'numeric-id'});
+                    $wikidataId = 'Q'.$latestClaim->mainsnak->datavalue->value->{'numeric-id'};
+                    $this->cacheWikiDataData($wikidataId);
+                    $this->checkForImageDataAndCacheIt($wikidataId);
                 }
 
                 $this->cachePropertyData($latestClaim->mainsnak->property);
@@ -289,6 +317,10 @@ class GeoDataImporterCommand extends ContainerAwareCommand{
         if(!array_key_exists($id, $this->claims)){
             $result = $this->getRAWDataFromUrl('https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids='.$id);
             $blub = json_decode($result);
+            if(!property_exists($blub, 'entities')) {
+                var_dump($blub);
+                return;
+            }
             $propertyData = $blub->entities->$id;
 
             $this->claims[$id] = $propertyData;
@@ -304,6 +336,41 @@ class GeoDataImporterCommand extends ContainerAwareCommand{
             $blub = $blub->entities->$id;
 
             $this->wikibaseItems[$id] = $blub;
+
+        }
+    }
+
+    private function checkForImageDataAndCacheIt($id){
+        $wikidataItem = $this->wikibaseItems[$id];
+
+        if($wikidataItem === null){
+            $this->cacheWikiDataData($id);
+            $wikidataItem = $this->wikibaseItems[$id];
+        }
+
+        if(
+            property_exists($wikidataItem, 'claims') &&
+            property_exists($wikidataItem->claims, 'P18') &&
+            count($wikidataItem->claims->P18) === 1 &&
+            $wikidataItem->claims->P18[0]->mainsnak->datatype === 'commonsMedia'
+        ) {
+
+            $result = $this->getRAWDataFromUrl(
+                'http://tools.wmflabs.org/magnus-toolserver/commonsapi.php?image=' .
+                str_replace(' ', '_', $wikidataItem->claims->P18[0]->mainsnak->datavalue->value)
+            );
+
+            $xmlString = simplexml_load_string($result);
+            if(!$xmlString ||
+                !property_exists($xmlString, 'file') ||
+                !property_exists($xmlString->file, 'urls') ||
+                !property_exists($xmlString->file->urls, 'file')){
+                return;
+            }
+            $imgUrl = $xmlString->file->urls->file;
+            $imgFileBlob = $this->getRAWDataFromUrl($imgUrl);
+
+            $this->wikibaseFlagImages[$id] = $imgFileBlob;
 
         }
     }

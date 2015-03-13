@@ -1,0 +1,8 @@
+Voka\VokaBundle\Document\WikibaseImage:
+    fields:
+        id:
+            id:  true
+            type: string
+            strategy: NONE
+        data:
+          type: bin
