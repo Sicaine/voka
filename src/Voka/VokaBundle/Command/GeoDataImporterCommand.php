@@ -233,13 +233,41 @@ class GeoDataImporterCommand extends ContainerAwareCommand{
 
 
             foreach($claims as $claim){
+                $latestTime = null;
+                $latestClaim = null;
+                // check for qualifier P580 = time -> example germany had capital bonn and has now berlin. look for freshest claim
+                if(is_array($claim)) {
+                    foreach ($claim as $subclaim) {
+                        if($latestClaim === null){
+                            $latestClaim = $subclaim;
+                        }
+                        if(
+                            property_exists($subclaim, 'qualifiers') &&
+                            property_exists($subclaim->qualifiers, 'P580') &&
+                            count($subclaim->qualifiers->P580) > 0 &&
+                            property_exists($subclaim->qualifiers->P580[0], 'datavalue')
+                        ){
+                            if($latestTime == null){
+                                $latestTime = new \DateTime(substr($subclaim->qualifiers->P580[0]->datavalue->value->time, 8));
+                                $latestClaim = $subclaim;
+                                $this->output->writeln($latestTime->format('Y-m-d H:i:s'));
+                            }
 
-                if($claim[0]->mainsnak->snaktype !== 'novalue' && property_exists($claim[0]->mainsnak, 'datatype') && $claim[0]->mainsnak->datatype == 'wikibase-item') {
-                    $this->cacheWikiDataData('Q'.$claim[0]->mainsnak->datavalue->value->{'numeric-id'});
+                            $time = new \DateTime(substr($subclaim->qualifiers->P580[0]->datavalue->value->time, 8));
+
+                            if($time > $latestTime) {
+                                $latestTime = new \DateTime(substr($subclaim->qualifiers->P580[0]->datavalue->value->time, 8));
+                                $latestClaim = $subclaim;
+                            }
+                        }
+                    }
                 }
 
+                if($latestClaim != null && $latestClaim->mainsnak->snaktype !== 'novalue' && property_exists($latestClaim->mainsnak, 'datatype') && $latestClaim->mainsnak->datatype == 'wikibase-item') {
+                    $this->cacheWikiDataData('Q'.$latestClaim->mainsnak->datavalue->value->{'numeric-id'});
+                }
 
-                $this->cachePropertyData($claim[0]->mainsnak->property);
+                $this->cachePropertyData($latestClaim->mainsnak->property);
             }
         }
 

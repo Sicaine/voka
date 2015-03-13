@@ -90,8 +90,11 @@ class GeoDataDeNormalizeCommand extends ContainerAwareCommand{
                     $value = $value[0]['mainsnak']['datavalue']['value'];
                     $claims[$property] = $value;
                 } else if($value[0]['mainsnak']['datatype'] == 'wikibase-item'){
+
+                    $latestWikiBaseItem = $this->findLatestWikibaseItem($value);
+
                     $this->output->write(' wikidata: ');
-                    $wikibaseId = $value[0]['mainsnak']['datavalue']['value']['numeric-id'];
+                    $wikibaseId = $latestWikiBaseItem['mainsnak']['datavalue']['value']['numeric-id'];
                     /** @var Wikibase[] $result */
                     $result = $this->dm->getRepository('VokaBundle:Wikibase')->findBy(['_id' => 'Q'.$wikibaseId], ['id' => 'asc']);
 
@@ -113,6 +116,39 @@ class GeoDataDeNormalizeCommand extends ContainerAwareCommand{
         }
 
         return $claims;
+    }
+
+    private function findLatestWikibaseItem($claim){
+        $latestTime = null;
+        $latestClaim = null;
+
+        foreach($claim as $subclaim) {
+
+            if ($latestClaim === null) {
+                $latestClaim = $subclaim;
+            }
+            if (is_array($subclaim) &&
+                array_key_exists('qualifiers', $subclaim) &&
+                array_key_exists('P580', $subclaim['qualifiers']) &&
+                count($subclaim['qualifiers']['P580']) > 0 &&
+                array_key_exists('datavalue', $subclaim['qualifiers']['P580'][0])
+            ) {
+                if ($latestTime == null) {
+                    $latestTime = new \DateTime(substr($subclaim['qualifiers']['P580'][0]['datavalue']['value']['time'], 8));
+                    $latestClaim = $subclaim;
+                    $this->output->writeln($latestTime->format('Y-m-d H:i:s'));
+                }
+
+                $time = new \DateTime(substr($subclaim['qualifiers']['P580'][0]['datavalue']['value']['time'], 8));
+
+                if ($time > $latestTime) {
+                    $latestTime = new \DateTime(substr($subclaim['qualifiers']['P580'][0]['datavalue']['value']['time'], 8));
+                    $latestClaim = $subclaim;
+                }
+            }
+        }
+
+        return $latestClaim;
     }
 
     private function findLabelFromCountry(Country $country){
