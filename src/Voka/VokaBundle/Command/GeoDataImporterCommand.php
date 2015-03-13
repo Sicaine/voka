@@ -175,9 +175,6 @@ class GeoDataImporterCommand extends ContainerAwareCommand{
         } else {
             $i = 1;
             foreach ($this->countries as $key => $value) {
-                if(substr($key, 1) < 816){
-                    continue;
-                }
                 $ids[] = $key;
                 if ($i % 50 == 0) {
                     $this->retrieveEntityDataAndClaims($ids);
