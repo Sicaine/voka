@@ -4,12 +4,31 @@
     <div class="text-center">
         <h1>Geo Voka</h1>
 
-            <h1>Question</h1>
-            name: {{ vokabel.name }} <br/>
-            label: {{ vokabel.label }} <br/>
-            continent: {{ vokabel.continent }} <br/>
-            capital: {{ vokabel.capital }} <br/>
-            <img id="flag" width="300px"/>
+
+        <div class="row">
+            <div class="col-lg-12"><h1>Type the country</h1></div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-3 col-lg-offset-3 text-right">Name:</div>
+            <div class="col-lg-3 text-left">{{ vokabel.label }}</div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-3 col-lg-offset-3 text-right">Continent:</div>
+            <div class="col-lg-3 text-left">{{ vokabel.continent }}</div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-3 col-lg-offset-3 text-right">Capital:</div>
+            <div class="col-lg-3 text-left">{{ vokabel.capital }}</div>
+        </div>
+
+        <div class="row" style="height:30px"></div>
+
+        <div class="row">
+            <div class="col-lg-4 col-lg-offset-4"><img id="flag" style="box-shadow: #eee" alt="dynamic flag image" width="300px"/></div>
+        </div>
 
     </div>
 
