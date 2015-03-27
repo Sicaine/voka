@@ -21,6 +21,16 @@ angular.module('Library', []).
                     scope.vokabel = vokabel.get({}, function (value) {
                             console.log(value);
                             console.log('success in vokabel');
+
+                            if(typeof value.flag !== 'undefined') {
+
+                                var blob = new Blob( [ value.flag ], { type: "image/svg+xml;charset=utf-8" } );
+                                var urlCreator = window.URL || window.webkitURL;
+
+
+                                var img = $document.find('#flag')[0];
+                                img.src = urlCreator.createObjectURL( blob );
+                            }
                         },
                         function (error) {
                             console.log('error in vokabel');
