@@ -360,18 +360,20 @@ class GeoDataImporterCommand extends ContainerAwareCommand{
                 str_replace(' ', '_', $wikidataItem->claims->P18[0]->mainsnak->datavalue->value)
             );
 
-            $xmlString = simplexml_load_string($result);
-            if(!$xmlString ||
-                !property_exists($xmlString, 'file') ||
-                !property_exists($xmlString->file, 'urls') ||
-                !property_exists($xmlString->file->urls, 'file')){
-                return;
+            try{
+                $xmlString = simplexml_load_string($result);
+                if(!$xmlString ||
+                    !property_exists($xmlString, 'file') ||
+                    !property_exists($xmlString->file, 'urls') ||
+                    !property_exists($xmlString->file->urls, 'file')){
+                    return;
+                }
+                $imgUrl = $xmlString->file->urls->file;
+                $imgFileBlob = $this->getRAWDataFromUrl($imgUrl);
+
+                $this->wikibaseFlagImages[$id] = $imgFileBlob;
+            } catch (\Exception $e) {
             }
-            $imgUrl = $xmlString->file->urls->file;
-            $imgFileBlob = $this->getRAWDataFromUrl($imgUrl);
-
-            $this->wikibaseFlagImages[$id] = $imgFileBlob;
-
         }
     }
 

@@ -42,6 +42,12 @@ final class VokaCountryCard
      */
     protected $population;
 
+
+    /**
+     * @ORM\Column(type="blob", nullable=true)
+     */
+    protected $flag;
+
     /**
      * @return mixed
      */
@@ -124,6 +130,20 @@ final class VokaCountryCard
      */
     public function setLabel($label) {
         $this->label = $label;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getFlag() {
+        return $this->flag;
+    }
+
+    /**
+     * @param mixed $flag
+     */
+    public function setFlag($flag) {
+        $this->flag = $flag;
     }
 
 

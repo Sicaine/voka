@@ -11,6 +11,7 @@ use Voka\VokaBundle\Document\Alias;
 use Voka\VokaBundle\Document\Country;
 use Voka\VokaBundle\Document\Property;
 use Voka\VokaBundle\Document\Wikibase;
+use Voka\VokaBundle\Document\WikibaseImage;
 use Voka\VokaBundle\Entity\VokaCountryCard;
 
 class GeoDataDeNormalizeCommand extends ContainerAwareCommand{
@@ -73,6 +74,12 @@ class GeoDataDeNormalizeCommand extends ContainerAwareCommand{
                 $countryCard->setPopulation($claims['P1082']);
             }
 
+
+            if(array_key_exists('P163', $claims)) {
+                $countryCard->setFlag($claims['P163']);
+            }
+
+
             $ormEm->persist($countryCard);
         }
         $ormEm->flush();
@@ -91,24 +98,41 @@ class GeoDataDeNormalizeCommand extends ContainerAwareCommand{
                     $value = $value[0]['mainsnak']['datavalue']['value'];
                     $claims[$property] = $value;
                 } else if($value[0]['mainsnak']['datatype'] == 'wikibase-item'){
-
-                    $latestWikiBaseItem = $this->findLatestWikibaseItem($value);
-
                     $this->output->write(' wikidata: ');
+                    $latestWikiBaseItem = $this->findLatestWikibaseItem($value);
                     $wikibaseId = $latestWikiBaseItem['mainsnak']['datavalue']['value']['numeric-id'];
-                    /** @var Wikibase[] $result */
-                    $result = $this->dm->getRepository('VokaBundle:Wikibase')->findBy(['_id' => 'Q'.$wikibaseId], ['id' => 'asc']);
 
-                    if(count($result) != 1){
-                        continue;
-                    }
-                    $json = json_decode($result[0]->getData());
+                    // P163 == flag
+                    if($property === 'P163') {
+                        /** @var WikibaseImage[] $result */
+                        $result = $this->dm->getRepository('VokaBundle:WikibaseImage')->findBy(
+                            ['_id' => 'Q' . $wikibaseId],
+                            ['id' => 'asc']
+                        );
 
-                    if(property_exists($json->labels, 'en')) {
-                        $this->output->writeln(' value: '.$json->labels->en->value);
-                        $claims[$property] = $json->labels->en->value;
+                        if(count($result) != 1){
+                            continue;
+                        }
+                        $claims[$property] = $result[0]->getData();
                     } else {
-                        continue;
+
+                        /** @var Wikibase[] $result */
+                        $result = $this->dm->getRepository('VokaBundle:Wikibase')->findBy(
+                            ['_id' => 'Q' . $wikibaseId],
+                            ['id' => 'asc']
+                        );
+
+                        if (count($result) != 1) {
+                            continue;
+                        }
+                        $json = json_decode($result[0]->getData());
+
+                        if (property_exists($json->labels, 'en')) {
+                            $this->output->writeln(' value: ' . $json->labels->en->value);
+                            $claims[$property] = $json->labels->en->value;
+                        } else {
+                            continue;
+                        }
                     }
                 }
 
