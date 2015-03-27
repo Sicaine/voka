@@ -21,6 +21,8 @@ class GeoDataImporterCommand extends ContainerAwareCommand{
     private $wikibaseFlagImages = [];
     const LOCAL_DEBUG = false;
     const ONLY_ONE_OBJ = false;
+
+    /** @var OutputInterface */
     private $output;
 
     protected function configure(){
@@ -166,7 +168,6 @@ class GeoDataImporterCommand extends ContainerAwareCommand{
 
     private function retrieveCountries($qCode = null){
 
-
         if($qCode !== null){
             if(strpos($qCode, ',') > 0) {
                 $qCodes = preg_split('/,/', $qCode);
@@ -178,15 +179,15 @@ class GeoDataImporterCommand extends ContainerAwareCommand{
                 $this->output->writeln('Created QCode entry for: ' . $qCode);
             }
         } else {
-            $this->output->writeln("Retrieving JSON Data from wmflabs");
+            $this->output->writeln('Retrieving JSON Data from wmflabs');
 
             $content = $this->getRAWDataFromUrl('http://wdq.wmflabs.org/api?q=TREE[6256][][31]');
 
-            $this->output->writeln("... retrieved.");
+            $this->output->writeln('... retrieved.');
 
-            $this->output->writeln("Start decode JSON");
+            $this->output->writeln('Start decode JSON');
             $result = json_decode($content);
-            $this->output->writeln("finished decode JSON");
+            $this->output->writeln('finished decode JSON');
 
             $this->countries = [];
 
@@ -208,7 +209,7 @@ class GeoDataImporterCommand extends ContainerAwareCommand{
             $i = 1;
             foreach ($this->countries as $key => $value) {
                 $ids[] = $key;
-                if ($i % 50 == 0) {
+                if ($i % 50 === 0) {
                     $this->retrieveEntityDataAndClaims($ids);
                     unset($ids);
                     $ids = [];
@@ -222,20 +223,6 @@ class GeoDataImporterCommand extends ContainerAwareCommand{
         }
 
 
-    }
-
-    private function createAliases(DocumentManager $dm, $data){
-        $result = [];
-        foreach($data as $key=>$value){
-
-            $doc = new Alias();
-            $doc->setLanguage($key);
-            $doc->setKeyvalue($value);
-
-            $dm->persist($doc);
-            $result[] = $doc;
-        }
-        return $result;
     }
 
     private function getRAWDataFromUrl($url) {
@@ -383,8 +370,6 @@ class GeoDataImporterCommand extends ContainerAwareCommand{
             }
         }
     }
-
-
 
 
     private $testdata = '{    "Q33": {
