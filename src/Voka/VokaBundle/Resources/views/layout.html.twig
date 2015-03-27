@@ -7,7 +7,11 @@
         <script language="javascript" src="{{ asset('/js/angular.js') }}"></script>
         <script language="javascript" src="{{ asset('/js/angular-resource.js') }}"></script>
         <script language="javascript" src="{{ asset('/js/angular-route.js') }}"></script>
-{% block head %}{% endblock %}
+
+        <link rel="stylesheet" type="text/css" href="{{ asset('css/bootstrap.css') }}">
+        <link rel="stylesheet" type="text/css" href="{{ asset('css/bootstrap-theme.css') }}">
+        <script language="javascript" src="{{ asset('/js/bootstrap.js') }}"></script>
+        {% block head %}{% endblock %}
         <meta http-equiv="Content-Type" content="text/html; charset={{ _charset }}"/>
         <meta name="robots" content="noindex,nofollow" />
         <title>{% block title %}Voka{% endblock %}</title>
