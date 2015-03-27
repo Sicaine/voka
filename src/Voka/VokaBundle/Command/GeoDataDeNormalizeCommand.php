@@ -99,7 +99,7 @@ class GeoDataDeNormalizeCommand extends ContainerAwareCommand{
 
             if($value[0]['mainsnak']['snaktype'] == 'value'){
                 $property = $value[0]['mainsnak']['property'];
-                $this->output->writeln(' found property: '.$property);
+                $this->output->write('. found property: '.$property);
                 if($value[0]['mainsnak']['datatype'] == 'value'){
                     $value = $value[0]['mainsnak']['datavalue']['value'];
                     $claims[$property] = $value;
@@ -134,7 +134,7 @@ class GeoDataDeNormalizeCommand extends ContainerAwareCommand{
                         $json = json_decode($result[0]->getData());
 
                         if (property_exists($json->labels, 'en')) {
-                            $this->output->writeln(' value: ' . $json->labels->en->value);
+                            $this->output->write(' value: ' . $json->labels->en->value);
                             $claims[$property] = $json->labels->en->value;
                         } else {
                             continue;
@@ -142,10 +142,11 @@ class GeoDataDeNormalizeCommand extends ContainerAwareCommand{
                     }
                 }
 
-                $this->output->writeln(' type: '.$value[0]['mainsnak']['datatype']);
+                $this->output->write(' type: '.$value[0]['mainsnak']['datatype']);
             }
         }
 
+        $this->output->writeln(' . claims done.');
         return $claims;
     }
 
