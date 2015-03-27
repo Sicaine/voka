@@ -25,7 +25,7 @@ class GeoDataImporterCommand extends ContainerAwareCommand{
 
     protected function configure(){
         $this->setName('voka:import:geodata');
-        $this->addOption('country', 'Q', InputArgument::OPTIONAL, 'Specify Country Code Q<XX..>');
+        $this->addOption('country', 'Q', InputArgument::OPTIONAL, 'Specify Country Code Q<XX..> or multiply with Q<XX..>,Q</XX..>');
         $this->addOption('offline', 'o', InputArgument::OPTIONAL, 'Offline mode, will use static data - usefull for debugging');
     }
 
@@ -168,8 +168,15 @@ class GeoDataImporterCommand extends ContainerAwareCommand{
 
 
         if($qCode !== null){
-            $this->countries['Q'. $qCode] = [];
-            $this->output->writeln("Created QCode entry for: ".$qCode);
+            if(strpos($qCode, ',') > 0) {
+                $qCodes = preg_split('/,/', $qCode);
+                foreach($qCodes as $entry){
+                    $this->countries[$entry] = [];
+                }
+            } else {
+                $this->countries[$qCode] = [];
+                $this->output->writeln('Created QCode entry for: ' . $qCode);
+            }
         } else {
             $this->output->writeln("Retrieving JSON Data from wmflabs");
 
