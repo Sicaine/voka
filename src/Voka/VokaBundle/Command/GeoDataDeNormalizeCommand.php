@@ -24,18 +24,24 @@ class GeoDataDeNormalizeCommand extends ContainerAwareCommand{
 
     protected function configure(){
         $this->setName('voka:generate:geodata');
+        $this->addOption('country', 'Q', InputArgument::OPTIONAL, 'Specify Country Code Q<XX..>');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output) {
-
+        $qCode = $input->getOption('country');
         $this->output = $output;
 
         $output->writeln('Read all countries from db');
 
         $this->dm = $this->getContainer()->get('doctrine_mongodb.odm.document_manager');
 
+        $qCodeSearchCriteria = [];
+        if($qCode !== null) {
+            $qCodeSearchCriteria['id'] = $qCode;
+        }
+
         /** @var Country[] $result */
-        $result = $this->dm->getRepository('VokaBundle:Country')->findBy([], ['id' => 'asc']);
+        $result = $this->dm->getRepository('VokaBundle:Country')->findBy($qCodeSearchCriteria, ['id' => 'asc']);
 
         /** @var EntityManager $ormEm */
         $ormEm = $this->getContainer()->get('doctrine.orm.default_entity_manager');
