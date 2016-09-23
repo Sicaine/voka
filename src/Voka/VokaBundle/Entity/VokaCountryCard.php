@@ -49,6 +49,21 @@ final class VokaCountryCard
     protected $flag;
 
     /**
+     * @ORM\Column(type="string", length=200, nullable=true)
+     */
+    protected $topLevelDomain;
+
+    /**
+     * @ORM\Column(type="string", length=200, nullable=true)
+     */
+    protected $basicFormOfGovernment;
+
+    /**
+     * @ORM\Column(type="string", length=200, nullable=true)
+     */
+    protected $highestPoint;
+
+    /**
      * @return mixed
      */
     public function getId() {
@@ -144,6 +159,48 @@ final class VokaCountryCard
      */
     public function setFlag($flag) {
         $this->flag = $flag;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTopLevelDomain() {
+        return $this->topLevelDomain;
+    }
+
+    /**
+     * @param mixed $topLevelDomain
+     */
+    public function setTopLevelDomain($topLevelDomain) {
+        $this->topLevelDomain = $topLevelDomain;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getBasicFormOfGovernment() {
+        return $this->basicFormOfGovernment;
+    }
+
+    /**
+     * @param mixed $basicFormOfGovernment
+     */
+    public function setBasicFormOfGovernment($basicFormOfGovernment) {
+        $this->basicFormOfGovernment = $basicFormOfGovernment;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getHighestPoint() {
+        return $this->highestPoint;
+    }
+
+    /**
+     * @param mixed $highestPoint
+     */
+    public function setHighestPoint($highestPoint) {
+        $this->highestPoint = $highestPoint;
     }
 
 

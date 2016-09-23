@@ -80,6 +80,17 @@ class GeoDataDeNormalizeCommand extends ContainerAwareCommand{
                 $countryCard->setPopulation($claims['P1082']);
             }
 
+            if(array_key_exists('P78', $claims)) {
+                $countryCard->setTopLevelDomain($claims['P78']);
+            }
+
+            if(array_key_exists('P122', $claims)) {
+                $countryCard->setBasicFormOfGovernment($claims['P122']);
+            }
+
+            if(array_key_exists('P610', $claims)) {
+                $countryCard->setHighestPoint($claims['P610']);
+            }
 
             if(array_key_exists('P163', $claims)) {
                 $countryCard->setFlag($claims['P163']);

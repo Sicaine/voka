@@ -27,7 +27,7 @@ class DefaultController extends Controller {
 
         /** @var VokaCountryCard[] $result */
         $result = $ormEm->createNativeQuery(
-            'SELECT v.id, v.name, v.capital, v.continent, v.population, v.label, v.flag
+            'SELECT v.id, v.name, v.capital, v.continent, v.population, v.label, v.flag, v.topLevelDomain, v.basicFormOfGovernment, v.highestPoint
              FROM VokaCountryCard as v
              WHERE name is not null AND capital is not null AND flag is not null ORDER BY RAND() LIMIT 1',
             $rsm
